@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crown &amp; Brim — New Era Caps</title>
+  <meta name="description" content="Shop New Era caps: 59FIFTY fitted, 9FIFTY snapback, 9FORTY adjustable and 39THIRTY stretch fit.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="promo">Free delivery on orders over <span data-free-ship></span> · 30-day returns</div>
+
+  <header class="site-header">
+    <a class="logo" href="#top" aria-label="Crown &amp; Brim home">CROWN<span>&amp;</span>BRIM</a>
+    <nav class="nav" aria-label="Main">
+      <a href="#shop">Shop</a>
+      <a href="#styles">Styles</a>
+      <a href="#size-guide">Size guide</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <button class="cart-btn" id="cartOpen" aria-haspopup="dialog">
+      Cart <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">New Era caps, in stock now</p>
+        <h1>Find the cap that fits.</h1>
+        <p class="lede">Fitted, snapback, adjustable and stretch fit New Era caps, picked by people who wear them every day.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#shop">Shop all caps</a>
+          <a class="btn btn-ghost" href="#size-guide">Find your size</a>
+        </div>
+      </div>
+      <div class="hero-art" id="heroArt" aria-hidden="true"></div>
+    </section>
+
+    <section class="styles" id="styles">
+      <h2>Shop by style</h2>
+      <div class="style-grid" id="styleGrid"></div>
+    </section>
+
+    <section class="shop" id="shop">
+      <div class="shop-head">
+        <h2>All caps</h2>
+        <p class="result-count" id="resultCount" aria-live="polite"></p>
+      </div>
+      <div class="toolbar">
+        <div class="chips" id="filterChips" role="group" aria-label="Filter by style"></div>
+        <div class="toolbar-right">
+          <label class="visually-hidden" for="search">Search caps</label>
+          <input type="search" id="search" placeholder="Search caps">
+          <label class="visually-hidden" for="sort">Sort</label>
+          <select id="sort">
+            <option value="featured">Featured</option>
+            <option value="price-asc">Price: low to high</option>
+            <option value="price-desc">Price: high to low</option>
+            <option value="name">Name</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid" id="productGrid"></div>
+      <p class="empty" id="emptyState" hidden>No caps match that search. Try a different style or clear the search.</p>
+    </section>
+
+    <section class="size-guide" id="size-guide">
+      <h2>Size guide</h2>
+      <p>Measure around your head just above the ears and eyebrows, where the cap will sit. Between two sizes? Go up.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Fitted size</th><th>Head (cm)</th><th>Head (in)</th><th>Stretch fit</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>6 7/8</td><td>54.9</td><td>21 5/8</td><td>S/M</td></tr>
+            <tr><td>7</td><td>55.8</td><td>22</td><td>S/M</td></tr>
+            <tr><td>7 1/8</td><td>56.8</td><td>22 3/8</td><td>S/M</td></tr>
+            <tr><td>7 1/4</td><td>57.7</td><td>22 3/4</td><td>M/L</td></tr>
+            <tr><td>7 3/8</td><td>58.7</td><td>23 1/8</td><td>M/L</td></tr>
+            <tr><td>7 1/2</td><td>59.6</td><td>23 1/2</td><td>M/L</td></tr>
+            <tr><td>7 5/8</td><td>60.6</td><td>23 7/8</td><td>L/XL</td></tr>
+            <tr><td>7 3/4</td><td>61.5</td><td>24 1/4</td><td>L/XL</td></tr>
+            <tr><td>8</td><td>63.5</td><td>25</td><td>L/XL</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="faq" id="faq">
+      <h2>Questions</h2>
+      <details>
+        <summary>Are these genuine New Era caps?</summary>
+        <p>Yes. Every cap we sell is an authentic New Era product. Crown &amp; Brim is an independent retailer and is not owned by or affiliated with New Era Cap.</p>
+      </details>
+      <details>
+        <summary>What is the difference between the styles?</summary>
+        <p>59FIFTY is a fitted cap with a flat brim and a structured crown, sold by exact head size. 9FIFTY has the same shape with a snapback closure. 9FORTY has a curved brim and an adjustable strap. 39THIRTY is a curved-brim cap in stretch fabric, sold in three size bands.</p>
+      </details>
+      <details>
+        <summary>How long does delivery take?</summary>
+        <p>Orders placed before 2pm ship the same working day and usually arrive in 2 to 4 working days.</p>
+      </details>
+      <details>
+        <summary>Can I return a cap that does not fit?</summary>
+        <p>Yes. Send it back unworn with the stickers on within 30 days and we will exchange or refund it.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p class="logo">CROWN<span>&amp;</span>BRIM</p>
+    <p>Independent retailer of New Era caps. New Era, 59FIFTY, 9FIFTY, 9FORTY and 39THIRTY are trademarks of New Era Cap, LLC.</p>
+    <p>&copy; <span id="year"></span> Crown &amp; Brim</p>
+  </footer>
+
+  <div class="overlay" id="overlay" hidden></div>
+
+  <!-- Product detail -->
+  <div class="modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="pmName" hidden>
+    <button class="close" data-close aria-label="Close">&times;</button>
+    <div class="pm-art" id="pmArt"></div>
+    <div class="pm-info">
+      <p class="eyebrow" id="pmStyle"></p>
+      <h3 id="pmName"></h3>
+      <p class="price" id="pmPrice"></p>
+      <p id="pmDesc"></p>
+      <fieldset>
+        <legend>Size</legend>
+        <div class="sizes" id="pmSizes"></div>
+      </fieldset>
+      <p class="form-error" id="pmError" role="alert" hidden>Choose a size first.</p>
+      <button class="btn btn-primary btn-block" id="pmAdd">Add to cart</button>
+    </div>
+  </div>
+
+  <!-- Cart -->
+  <aside class="drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-labelledby="cartTitle" hidden>
+    <div class="drawer-head">
+      <h3 id="cartTitle">Your cart</h3>
+      <button class="close" data-close aria-label="Close">&times;</button>
+    </div>
+    <div class="drawer-body" id="cartItems"></div>
+    <div class="drawer-foot" id="cartFoot">
+      <div class="row"><span>Subtotal</span><span id="cartSubtotal"></span></div>
+      <div class="row"><span>Delivery</span><span id="cartShipping"></span></div>
+      <div class="row total"><span>Total</span><span id="cartTotal"></span></div>
+      <button class="btn btn-primary btn-block" id="checkoutOpen">Checkout</button>
+    </div>
+  </aside>
+
+  <!-- Checkout -->
+  <div class="modal modal-narrow" id="checkoutModal" role="dialog" aria-modal="true" aria-labelledby="coTitle" hidden>
+    <button class="close" data-close aria-label="Close">&times;</button>
+    <div class="co-body" id="coBody">
+      <h3 id="coTitle">Checkout</h3>
+      <p class="muted">Total to pay on delivery: <strong id="coTotal"></strong></p>
+      <form id="checkoutForm" novalidate>
+        <label>Full name <input name="name" autocomplete="name" required></label>
+        <label>Email <input name="email" type="email" autocomplete="email" required></label>
+        <label>Phone <input name="phone" type="tel" autocomplete="tel" required></label>
+        <label>Delivery address <textarea name="address" rows="3" autocomplete="street-address" required></textarea></label>
+        <p class="form-error" id="coError" role="alert" hidden></p>
+        <button class="btn btn-primary btn-block" type="submit">Place order</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
