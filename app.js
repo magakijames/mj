@@ -2,56 +2,68 @@
   'use strict';
 
   // ---- Store settings: edit these to match your shop ----
-  var CURRENCY = 'USD';
-  var LOCALE = 'en-US';
-  var FREE_SHIPPING_OVER = 75;
-  var SHIPPING_FEE = 6;
-  var CART_KEY = 'crownbrim.cart.v1';
+  var CURRENCY_LABEL = 'KSh';
+  var FREE_SHIPPING_OVER = 5000;
+  var SHIPPING_FEE = 300;
+  var PRICE = 1500;
+  var CART_KEY = 'crownbrim.cart.v2';
 
   var FITTED = ['6 7/8', '7', '7 1/8', '7 1/4', '7 3/8', '7 1/2', '7 5/8', '7 3/4', '8'];
-  var STRETCH = ['S/M', 'M/L', 'L/XL'];
   var ONE = ['One size'];
 
   var STYLES = {
-    '59FIFTY': { label: 'Fitted', blurb: 'Flat brim, exact sizes', sizes: FITTED, flat: true },
-    '9FIFTY': { label: 'Snapback', blurb: 'Flat brim, snap closure', sizes: ONE, flat: true },
-    '9FORTY': { label: 'Adjustable', blurb: 'Curved brim, strap back', sizes: ONE, flat: false },
-    '39THIRTY': { label: 'Stretch fit', blurb: 'Curved brim, flex band', sizes: STRETCH, flat: false }
+    '59FIFTY': { label: 'Fitted', blurb: 'Flat brim, exact sizes', sizes: FITTED },
+    '9FIFTY': { label: 'Snapback', blurb: 'Flat brim, snap closure', sizes: ONE },
+    '9FORTY': { label: 'Adjustable', blurb: 'Curved brim, strap back', sizes: ONE }
   };
 
   // ---- Catalogue: add, remove or reprice caps here ----
+  // `variants` is optional: use it when one photo shows more than one cap.
   var PRODUCTS = [
-    { id: 'f-navy', style: '59FIFTY', name: 'Classic Navy Fitted', price: 44, crown: '#1c2a4a', brim: '#1c2a4a', under: '#8a8f98', badge: 'Best seller',
-      desc: 'The original fitted cap. Structured six-panel crown, flat brim and a grey undervisor.' },
-    { id: 'f-black', style: '59FIFTY', name: 'Blackout Fitted', price: 44, crown: '#17181b', brim: '#17181b', under: '#17181b',
-      desc: 'All black from button to undervisor. Wool-blend crown with a high, structured profile.' },
-    { id: 'f-cream', style: '59FIFTY', name: 'Cream & Forest Fitted', price: 48, crown: '#efe6d2', brim: '#254f3a', under: '#254f3a', badge: 'New',
-      desc: 'Two-tone fitted with a cream crown and a forest green brim and button.' },
-    { id: 'f-burg', style: '59FIFTY', name: 'Burgundy Fitted', price: 46, crown: '#6d1f2c', brim: '#6d1f2c', under: '#d9a7b0',
-      desc: 'Deep burgundy crown with a soft pink undervisor for a flash of colour.' },
-    { id: 's-red', style: '9FIFTY', name: 'Scarlet Snapback', price: 38, crown: '#c5281c', brim: '#17181b', under: '#2f8a57',
-      desc: 'Bright scarlet crown over a black flat brim, with a green undervisor and snap closure.' },
-    { id: 's-grey', style: '9FIFTY', name: 'Heather Grey Snapback', price: 36, crown: '#a3a7ad', brim: '#1c2a4a', under: '#1c2a4a',
-      desc: 'Heather grey crown, navy brim. One size, adjusts with the snap at the back.' },
-    { id: 's-sky', style: '9FIFTY', name: 'Sky Blue Snapback', price: 38, crown: '#7fb4dc', brim: '#7fb4dc', under: '#efe6d2', badge: 'New',
-      desc: 'Light blue all over with a cream undervisor. Same shape as the fitted, easier to size.' },
-    { id: 'a-olive', style: '9FORTY', name: 'Olive Adjustable', price: 30, crown: '#5c6340', brim: '#5c6340', under: '#5c6340',
-      desc: 'Washed cotton twill with a curved brim and a cloth strap. The easy everyday cap.' },
-    { id: 'a-black', style: '9FORTY', name: 'Black Adjustable', price: 30, crown: '#17181b', brim: '#17181b', under: '#17181b', badge: 'Best seller',
-      desc: 'A plain black curved-brim cap with an adjustable strap. Goes with everything.' },
-    { id: 'a-sand', style: '9FORTY', name: 'Sand Adjustable', price: 32, crown: '#d7c3a0', brim: '#d7c3a0', under: '#8a6f4a',
-      desc: 'Sand cotton crown with a tan undervisor. Soft, light and broken in from day one.' },
-    { id: 't-navy', style: '39THIRTY', name: 'Navy Stretch Fit', price: 34, crown: '#1c2a4a', brim: '#1c2a4a', under: '#1c2a4a',
-      desc: 'Closed back with a stretch sweatband, so it sits like a fitted without exact sizing.' },
-    { id: 't-char', style: '39THIRTY', name: 'Charcoal Stretch Fit', price: 34, crown: '#43464c', brim: '#17181b', under: '#17181b',
-      desc: 'Charcoal stretch crown with a black curved brim. Three size bands cover most heads.' }
+    { id: 'pink-ny-custom', style: '59FIFTY', name: 'Pink NY Custom Fitted', img: 'pink-ny-custom.jpg', badge: 'Limited',
+      desc: 'Soft pink crown and brim with a white NY logo, a 1997 side patch and custom embroidery on the front panel.' },
+    { id: 'sox-flames', style: '59FIFTY', name: 'Sox Flames Fitted', img: 'sox-flames.jpg', badge: 'Popular',
+      variantLabel: 'Colour', variants: ['Black', 'Pink'],
+      desc: 'A ring of embroidered flames climbing the crown behind a raised white Sox logo. Comes in black with red flames or pink with magenta flames.' },
+    { id: 'blackout-la-ny', style: '59FIFTY', name: 'Blackout Fitted', img: 'blackout-la-ny.jpg',
+      variantLabel: 'Logo', variants: ['LA, grey undervisor', 'NY, red undervisor'],
+      desc: 'Black on black: a tonal raised logo on a black crown, with a contrast undervisor that only shows when you tip the brim.' },
+    { id: 'sox-roses', style: '59FIFTY', name: 'Sox Roses Fitted', img: 'sox-roses.jpg', badge: 'Popular',
+      desc: 'Black fitted with a white Sox logo, embroidered red roses and a bee on the front, and champions script on the side.' },
+    { id: 'ny-cherry-blossom', style: '9FIFTY', name: 'NY Cherry Blossom Snapback', img: 'ny-cherry-blossom.jpg', badge: 'New',
+      variantLabel: 'Colour', variants: ['Black', 'Stone'],
+      desc: 'A white NY logo with a pink cherry blossom branch stitched across it and petals falling over the crown.' },
+    { id: 'cream-black', style: '9FORTY', name: 'Cream & Black Adjustable', img: 'cream-black-ny-la.jpg',
+      variantLabel: 'Logo', variants: ['NY', 'LA'],
+      desc: 'Cream crown, black curved brim and a green undervisor, finished with a commemorative patch on the side.' },
+    { id: 'ny-black-pin', style: '9FIFTY', name: 'NY Black Snapback with Gold Pin', img: 'ny-black-pin-snapback.jpg',
+      desc: 'The classic black snapback with a white NY logo, set off by a small gold pin on the front panel.' },
+    { id: 'ny-cream-navy', style: '59FIFTY', name: 'NY Cream & Navy Star Patch Fitted', img: 'ny-cream-navy-star.jpg', badge: 'New',
+      desc: 'Cream crown with a navy brim, button and NY logo, plus a gold-stitched star patch on the side.' },
+    { id: 'ny-white-navy', style: '59FIFTY', name: 'NY White & Navy Fitted', img: 'ny-white-navy.jpg',
+      desc: 'Clean white crown with a navy brim, button and NY logo. Crisp, simple and easy to wear.' },
+    { id: 'ny-black-low', style: '59FIFTY', name: 'NY Black Low Profile Fitted', img: 'ny-black-low-profile.jpg',
+      desc: 'Black fitted with a white NY logo, in the low profile shape: a shallower crown and a gently curved brim.' },
+    { id: 'ny-sky-red', style: '59FIFTY', name: 'NY Sky Blue & Red Fitted', img: 'ny-sky-red.jpg',
+      desc: 'Sky blue crown with a red brim and button, and a white NY logo outlined in red.' },
+    { id: 'ny-white-purple', style: '59FIFTY', name: 'NY White & Purple Fitted', img: 'ny-white-purple.jpg', more: ['ny-white-purple-front.jpg'],
+      desc: 'White crown with a purple brim, a green NY logo outlined in purple and a matching World Series side patch.' },
+    { id: 'ny-royal', style: '59FIFTY', name: 'NY Royal Blue Fitted', img: 'ny-royal-blue.jpg',
+      desc: 'Royal blue from button to brim with a white NY logo.' },
+    { id: 'mets-royal', style: '59FIFTY', name: 'Mets Royal Fitted', img: 'mets-royal.jpg',
+      desc: 'The royal blue Mets cap with the orange NY logo and an orange button.' },
+    { id: 'mets-script', style: '59FIFTY', name: 'Mets Champions Script Fitted', img: 'mets-champions-script.jpg',
+      desc: 'Royal blue Mets fitted with an orange logo and champions script embroidered down the side.' },
+    { id: 'mets-llc', style: '59FIFTY', name: 'Mets Little League Classic 2025 Fitted', img: 'mets-little-league-classic.jpg',
+      desc: 'Royal blue Mets fitted with the 2025 Little League Classic patch on the side.' },
+    { id: 'mets-post', style: '59FIFTY', name: 'Mets Postseason 2022 Fitted', img: 'mets-postseason-2022.jpg',
+      desc: 'Royal blue Mets fitted with the 2022 Postseason patch on the side.' }
   ];
 
   var byId = {};
-  PRODUCTS.forEach(function (p) { byId[p.id] = p; });
+  PRODUCTS.forEach(function (p) { p.price = p.price || PRICE; byId[p.id] = p; });
 
-  var money = new Intl.NumberFormat(LOCALE, { style: 'currency', currency: CURRENCY, maximumFractionDigits: 0 });
-  function fmt(n) { return money.format(n); }
+  function fmt(n) { return CURRENCY_LABEL + ' ' + n.toLocaleString('en-KE'); }
   function $(id) { return document.getElementById(id); }
   function el(tag, cls, text) {
     var n = document.createElement(tag);
@@ -59,26 +71,12 @@
     if (text != null) n.textContent = text;
     return n;
   }
-
-  // ---- Cap illustration ----
-  function capSvg(p) {
-    var flat = STYLES[p.style].flat;
-    var brim = flat
-      ? 'M52 96 C34 96 14 99 6 104 C3 106 4 110 8 110 C40 109 84 106 112 101 Z'
-      : 'M52 96 C36 98 18 106 10 116 C8 119 10 122 14 121 C44 114 84 108 112 101 Z';
-    var under = flat
-      ? 'M8 110 C40 109 84 106 112 101 L108 104 C80 109 40 113 10 113 Z'
-      : 'M14 121 C44 114 84 108 112 101 L108 105 C82 111 46 118 17 124 Z';
-    return '<svg viewBox="0 0 200 140" role="img" aria-label="' + p.name + '">' +
-      '<ellipse cx="104" cy="128" rx="78" ry="6" fill="rgba(0,0,0,.12)"/>' +
-      '<path d="' + under + '" fill="' + p.under + '"/>' +
-      '<path d="' + brim + '" fill="' + p.brim + '"/>' +
-      '<path d="M50 98 C46 54 78 24 118 24 C158 24 184 58 182 102 C140 108 92 106 50 98 Z" fill="' + p.crown + '"/>' +
-      '<path d="M118 24 C100 44 90 72 90 104 M118 24 C132 46 140 76 142 106" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.2"/>' +
-      '<path d="M50 98 C92 106 140 108 182 102" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="2"/>' +
-      '<circle cx="74" cy="60" r="1.8" fill="rgba(0,0,0,.35)"/><circle cx="118" cy="50" r="1.8" fill="rgba(0,0,0,.35)"/><circle cx="158" cy="62" r="1.8" fill="rgba(0,0,0,.35)"/>' +
-      '<ellipse cx="118" cy="24" rx="7" ry="3.2" fill="' + p.brim + '" stroke="rgba(0,0,0,.25)" stroke-width="1"/>' +
-      '</svg>';
+  function photo(file, alt) {
+    var i = el('img');
+    i.src = 'images/' + file;
+    i.alt = alt;
+    i.loading = 'lazy';
+    return i;
   }
 
   // ---- Catalogue rendering ----
@@ -91,8 +89,6 @@
       if (!q) return true;
       return (p.name + ' ' + p.style + ' ' + STYLES[p.style].label).toLowerCase().indexOf(q) !== -1;
     });
-    if (state.sort === 'price-asc') list.sort(function (a, b) { return a.price - b.price; });
-    if (state.sort === 'price-desc') list.sort(function (a, b) { return b.price - a.price; });
     if (state.sort === 'name') list.sort(function (a, b) { return a.name.localeCompare(b.name); });
     return list;
   }
@@ -107,7 +103,7 @@
       var art = el('button', 'card-art');
       art.type = 'button';
       art.setAttribute('aria-label', 'View ' + p.name);
-      art.innerHTML = capSvg(p);
+      art.appendChild(photo(p.img, ''));
       art.addEventListener('click', function () { openProduct(p.id, art); });
       card.appendChild(art);
 
@@ -116,8 +112,9 @@
       body.appendChild(el('h3', 'card-name', p.name));
       var foot = el('div', 'card-foot');
       foot.appendChild(el('p', 'price', fmt(p.price)));
-      var btn = el('button', 'btn btn-primary', 'Choose size');
+      var btn = el('button', 'btn btn-primary', 'Choose');
       btn.type = 'button';
+      btn.setAttribute('aria-label', 'Choose options for ' + p.name);
       btn.addEventListener('click', function () { openProduct(p.id, btn); });
       foot.appendChild(btn);
       body.appendChild(foot);
@@ -186,46 +183,85 @@
   }
 
   // ---- Product detail ----
-  var current = { id: null, size: null };
+  var current = { id: null, size: null, variant: null };
+
+  function pickers(box, options, key) {
+    box.textContent = '';
+    options.forEach(function (o) {
+      var b = el('button', 'size', o);
+      b.type = 'button';
+      b.setAttribute('aria-pressed', String(o === current[key]));
+      b.addEventListener('click', function () {
+        current[key] = o;
+        $('pmError').hidden = true;
+        Array.prototype.forEach.call(box.children, function (n) {
+          n.setAttribute('aria-pressed', String(n === b));
+        });
+      });
+      box.appendChild(b);
+    });
+  }
 
   function openProduct(id, trigger) {
     var p = byId[id];
     var sizes = STYLES[p.style].sizes;
-    current = { id: id, size: sizes.length === 1 ? sizes[0] : null };
-    $('pmArt').innerHTML = capSvg(p);
+    current = { id: id, size: sizes.length === 1 ? sizes[0] : null, variant: p.variants ? null : '' };
+
+    var art = $('pmArt');
+    art.textContent = '';
+    var main = photo(p.img, p.name);
+    main.loading = 'eager';
+    art.appendChild(main);
+    if (p.more) {
+      var thumbs = el('div', 'thumbs');
+      [p.img].concat(p.more).forEach(function (file, i) {
+        var t = el('button', 'thumb-btn');
+        t.type = 'button';
+        t.setAttribute('aria-label', 'Show photo ' + (i + 1));
+        t.setAttribute('aria-pressed', String(i === 0));
+        t.appendChild(photo(file, ''));
+        t.addEventListener('click', function () {
+          main.src = 'images/' + file;
+          Array.prototype.forEach.call(thumbs.children, function (n) {
+            n.setAttribute('aria-pressed', String(n === t));
+          });
+        });
+        thumbs.appendChild(t);
+      });
+      art.appendChild(thumbs);
+    }
+
     $('pmStyle').textContent = p.style + ' · ' + STYLES[p.style].label;
     $('pmName').textContent = p.name;
     $('pmPrice').textContent = fmt(p.price);
     $('pmDesc').textContent = p.desc;
     $('pmError').hidden = true;
-    var box = $('pmSizes');
-    box.textContent = '';
-    sizes.forEach(function (s) {
-      var b = el('button', 'size', s);
-      b.type = 'button';
-      b.setAttribute('aria-pressed', String(s === current.size));
-      b.addEventListener('click', function () {
-        current.size = s;
-        $('pmError').hidden = true;
-        Array.prototype.forEach.call(box.children, function (o) {
-          o.setAttribute('aria-pressed', String(o === b));
-        });
-      });
-      box.appendChild(b);
-    });
+
+    $('pmVariantField').hidden = !p.variants;
+    if (p.variants) {
+      $('pmVariantLegend').textContent = p.variantLabel;
+      pickers($('pmVariants'), p.variants, 'variant');
+    }
+    pickers($('pmSizes'), sizes, 'size');
     show($('productModal'), trigger);
   }
 
   // ---- Cart ----
   var cart = loadCart();
 
+  function validLine(i) {
+    var p = i && byId[i.id];
+    if (!p || STYLES[p.style].sizes.indexOf(i.size) === -1 || !(i.qty > 0)) return false;
+    return p.variants ? p.variants.indexOf(i.variant) !== -1 : !i.variant;
+  }
+
   function loadCart() {
     try {
       var raw = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
       if (!Array.isArray(raw)) return [];
-      return raw.filter(function (i) {
-        return i && byId[i.id] && STYLES[byId[i.id].style].sizes.indexOf(i.size) !== -1 && i.qty > 0;
-      }).map(function (i) { return { id: i.id, size: i.size, qty: Math.min(99, Math.floor(i.qty)) }; });
+      return raw.filter(validLine).map(function (i) {
+        return { id: i.id, size: i.size, variant: i.variant || '', qty: Math.min(99, Math.floor(i.qty)) };
+      });
     } catch (e) { return []; }
   }
 
@@ -239,9 +275,9 @@
     return { subtotal: subtotal, shipping: shipping, total: subtotal + shipping };
   }
 
-  function addToCart(id, size) {
-    var line = cart.filter(function (i) { return i.id === id && i.size === size; })[0];
-    if (line) line.qty = Math.min(99, line.qty + 1); else cart.push({ id: id, size: size, qty: 1 });
+  function addToCart(id, size, variant) {
+    var line = cart.filter(function (i) { return i.id === id && i.size === size && i.variant === variant; })[0];
+    if (line) line.qty = Math.min(99, line.qty + 1); else cart.push({ id: id, size: size, variant: variant, qty: 1 });
     saveCart();
     renderCart();
   }
@@ -262,12 +298,12 @@
       var p = byId[item.id];
       var row = el('div', 'cart-item');
       var thumb = el('div', 'thumb');
-      thumb.innerHTML = capSvg(p);
+      thumb.appendChild(photo(p.img, ''));
       row.appendChild(thumb);
 
       var mid = el('div');
       mid.appendChild(el('h4', null, p.name));
-      mid.appendChild(el('small', null, p.style + ' · ' + item.size));
+      mid.appendChild(el('small', null, [item.variant, item.size].filter(Boolean).join(' · ')));
       var qty = el('div', 'qty');
       var minus = el('button', null, '−');
       minus.type = 'button';
@@ -352,7 +388,7 @@
     var body = $('coBody');
     body.textContent = '';
     body.appendChild(el('p', 'eyebrow', 'Order placed'));
-    body.appendChild(el('h3', null, 'Thanks, ' + data.name.split(' ')[0] + '.'));
+    body.appendChild(el('h3', null, 'Thank you, ' + data.name.split(' ')[0] + '.'));
     var p = el('p');
     p.appendChild(document.createTextNode('Your order reference is '));
     p.appendChild(el('span', 'order-ref', order.ref));
@@ -373,7 +409,7 @@
     checkoutMarkup = $('coBody').innerHTML;
     $('year').textContent = new Date().getFullYear();
     document.querySelector('[data-free-ship]').textContent = fmt(FREE_SHIPPING_OVER);
-    $('heroArt').innerHTML = capSvg(byId['f-cream']);
+    document.querySelector('[data-price]').textContent = fmt(PRICE);
 
     renderFilters();
     renderGrid();
@@ -383,10 +419,18 @@
     $('sort').addEventListener('change', function (e) { state.sort = e.target.value; renderGrid(); });
 
     $('pmAdd').addEventListener('click', function () {
-      if (!current.size) { $('pmError').hidden = false; return; }
-      addToCart(current.id, current.size);
+      var p = byId[current.id];
+      var missing = [];
+      if (current.variant === null) missing.push(p.variantLabel.toLowerCase());
+      if (!current.size) missing.push('size');
+      if (missing.length) {
+        $('pmError').textContent = 'Choose a ' + missing.join(' and a ') + ' first.';
+        $('pmError').hidden = false;
+        return;
+      }
+      addToCart(current.id, current.size, current.variant);
       closeDialog();
-      toast(byId[current.id].name + ' added to cart');
+      toast(p.name + ' added to cart');
     });
 
     $('cartOpen').addEventListener('click', function () { show($('cartDrawer'), $('cartOpen')); });
