@@ -17,8 +17,9 @@
     '9FORTY': { label: 'Adjustable', blurb: 'Curved brim, strap back', sizes: ONE }
   };
 
-  // ---- Catalogue: add, remove or reprice caps here ----
-  // `variants` is optional: use it when one photo shows more than one cap.
+  // ---- Catalogue: add, remove or reprice products here ----
+  // New Era caps take their sizes from `style` and cost PRICE unless given a `price`.
+  // `variants` is optional: use it for colours, or when one photo shows more than one cap.
   var PRODUCTS = [
     { id: 'pink-ny-custom', style: '59FIFTY', name: 'Pink NY Custom Fitted', img: 'pink-ny-custom.jpg', badge: 'Limited',
       desc: 'Soft pink crown and brim with a white NY logo, a 1997 side patch and custom embroidery on the front panel.' },
@@ -57,11 +58,63 @@
     { id: 'mets-llc', style: '59FIFTY', name: 'Mets Little League Classic 2025 Fitted', img: 'mets-little-league-classic.jpg',
       desc: 'Royal blue Mets fitted with the 2025 Little League Classic patch on the side.' },
     { id: 'mets-post', style: '59FIFTY', name: 'Mets Postseason 2022 Fitted', img: 'mets-postseason-2022.jpg',
-      desc: 'Royal blue Mets fitted with the 2022 Postseason patch on the side.' }
+      desc: 'Royal blue Mets fitted with the 2022 Postseason patch on the side.' },
+
+    // Bags, and caps and hats from other makers. Prices are in KSh.
+    { id: "anti-theft-laptop-backpack", cat: "Bags", group: "Unisex", name: "Anti-Theft Laptop Backpack", img: "p0.jpg", price: 7800, sizes: ["M", "L"], variantLabel: 'Colour', variants: ["Grey", "Black"] },
+    { id: "usb-travel-backpack", cat: "Bags", group: "Unisex", name: "USB Travel Backpack", img: "p18.jpg", price: 7150, sizes: ["L"] },
+    { id: "everyday-casual-backpack", cat: "Bags", group: "Men", name: "Everyday Casual Backpack", img: "p44.jpg", price: 5200, sizes: ["M", "L"], variantLabel: 'Colour', variants: ["Grey", "Black", "Navy"] },
+    { id: "minimal-backpack", cat: "Bags", group: "Unisex", name: "Minimal Backpack", img: "p54.jpg", price: 6500, sizes: ["M", "L"], variantLabel: 'Colour', variants: ["Navy", "Black", "Green"] },
+    { id: "quilted-leather-backpack", cat: "Bags", group: "Women", name: "Quilted Leather Backpack", img: "p48.jpg", price: 8450, sizes: ["M"], variantLabel: 'Colour', variants: ["Brown", "Black"] },
+    { id: "burgundy-leather-backpack", cat: "Bags", group: "Women", name: "Burgundy Leather Backpack", img: "p55.jpg", price: 9100, sizes: ["M"], variantLabel: 'Colour', variants: ["Red", "Brown"] },
+    { id: "unicorn-kids-backpack", cat: "Bags", group: "Kids", name: "Unicorn Kids Backpack", img: "p32.jpg", price: 3900, sizes: ["S"] },
+    { id: "checkered-crossbody-bag", cat: "Bags", group: "Men", name: "Checkered Crossbody Bag", img: "p2.jpg", price: 3250, sizes: ["S"], variantLabel: 'Colour', variants: ["Grey", "Black"] },
+    { id: "leather-messenger-bag", cat: "Bags", group: "Men", name: "Leather Messenger Bag", img: "p36.jpg", price: 5850, sizes: ["S", "M"] },
+    { id: "gym-duffel-bag", cat: "Bags", group: "Men", name: "Gym Duffel Bag", img: "p11.jpg", price: 5500, sizes: ["M", "L"] },
+    { id: "navy-gold-trim-handbag", cat: "Bags", group: "Women", name: "Navy Gold-Trim Handbag", img: "p3.jpg", price: 9750, sizes: ["M"] },
+    { id: "navy-classic-handbag", cat: "Bags", group: "Women", name: "Navy Classic Handbag", img: "p7.jpg", price: 9100, sizes: ["M"], variantLabel: 'Colour', variants: ["Navy", "Black"] },
+    { id: "blush-structured-tote", cat: "Bags", group: "Women", name: "Blush Structured Tote", img: "p9.jpg", price: 7800, sizes: ["M", "L"], variantLabel: 'Colour', variants: ["Beige", "Pink"] },
+    { id: "pink-satchel-handbag", cat: "Bags", group: "Women", name: "Pink Satchel Handbag", img: "p17.jpg", price: 7150, sizes: ["M"], variantLabel: 'Colour', variants: ["Pink", "Black"] },
+    { id: "mini-pink-crossbody", cat: "Bags", group: "Women", name: "Mini Pink Crossbody", img: "p16.jpg", price: 4550, sizes: ["S"] },
+    { id: "grey-handbag-with-purse", cat: "Bags", group: "Women", name: "Grey Handbag with Purse", img: "p26.jpg", price: 10400, sizes: ["M"], variantLabel: 'Colour', variants: ["Grey", "Beige"] },
+    { id: "3-piece-handbag-set", cat: "Bags", group: "Women", name: "3-Piece Handbag Set", img: "p25.jpg", price: 11050, sizes: ["M", "L"], variantLabel: 'Colour', variants: ["Navy", "Brown"] },
+    { id: "black-tassel-handbag", cat: "Bags", group: "Women", name: "Black Tassel Handbag", img: "p40.jpg", price: 6500, sizes: ["M"] },
+    { id: "black-bow-work-tote", cat: "Bags", group: "Women", name: "Black Bow Work Tote", img: "p47.jpg", price: 7550, sizes: ["L"] },
+    { id: "brown-saddle-crossbody", cat: "Bags", group: "Women", name: "Brown Saddle Crossbody", img: "p43.jpg", price: 5050, sizes: ["S"] },
+    { id: "woven-leather-tote", cat: "Bags", group: "Women", name: "Woven Leather Tote", img: "p50.jpg", price: 11700, sizes: ["L"] },
+    { id: "black-work-tote", cat: "Bags", group: "Women", name: "Black Work Tote", img: "p51.jpg", price: 9500, sizes: ["L"] },
+    { id: "classic-baseball-cap", cat: "Caps & hats", group: "Unisex", name: "Classic Baseball Cap", img: "p12.jpg", price: 2600, sizes: ["S/M", "L/XL"], variantLabel: 'Colour', variants: ["Black", "Navy", "Grey"] },
+    { id: "sport-mesh-cap", cat: "Caps & hats", group: "Men", name: "Sport Mesh Cap", img: "p29.jpg", price: 2850, sizes: ["S/M", "L/XL"], variantLabel: 'Colour', variants: ["Black", "Grey", "Navy"] },
+    { id: "embroidered-cross-cap", cat: "Caps & hats", group: "Unisex", name: "Embroidered Cross Cap", img: "p46.jpg", price: 3000, sizes: ["One size"] },
+    { id: "quilted-leather-cap", cat: "Caps & hats", group: "Men", name: "Quilted Leather Cap", img: "p41.jpg", price: 3900, sizes: ["One size"], variantLabel: 'Colour', variants: ["Black", "Navy"] },
+    { id: "red-fade-baseball-cap", cat: "Caps & hats", group: "Women", name: "Red Fade Baseball Cap", img: "p49.jpg", price: 2450, sizes: ["One size"], variantLabel: 'Colour', variants: ["Red", "White"] },
+    { id: "flat-brim-snapback", cat: "Caps & hats", group: "Men", name: "Flat Brim Snapback", img: "p19.jpg", price: 3000, sizes: ["One size"], variantLabel: 'Colour', variants: ["Black", "Beige", "Blue", "Red", "White"], soldOut: true },
+    { id: "brimless-docker-cap", cat: "Caps & hats", group: "Men", name: "Brimless Docker Cap", img: "p21.jpg", price: 2200, sizes: ["One size"] },
+    { id: "sports-brimless-cap", cat: "Caps & hats", group: "Unisex", name: "Sports Brimless Cap", img: "p24.jpg", price: 2350, sizes: ["One size"], variantLabel: 'Colour', variants: ["Beige", "Grey", "Green", "Navy"] },
+    { id: "bucket-hat", cat: "Caps & hats", group: "Unisex", name: "Bucket Hat", img: "p10.jpg", price: 3250, sizes: ["S/M", "L/XL"] },
+    { id: "camo-army-cap", cat: "Caps & hats", group: "Men", name: "Camo Army Cap", img: "p31.jpg", price: 2600, sizes: ["One size"], variantLabel: 'Colour', variants: ["Green", "Khaki"] },
+    { id: "mesh-army-cap", cat: "Caps & hats", group: "Men", name: "Mesh Army Cap", img: "p35.jpg", price: 2450, sizes: ["One size"] },
+    { id: "graffiti-print-cap", cat: "Caps & hats", group: "Unisex", name: "Graffiti Print Cap", img: "p39.jpg", price: 2750, sizes: ["One size"], variantLabel: 'Colour', variants: ["Black", "White"] },
+    { id: "ribbed-beanie", cat: "Caps & hats", group: "Unisex", name: "Ribbed Beanie", img: "p15.jpg", price: 1950, sizes: ["One size"] },
+    { id: "fisherman-beanie-set", cat: "Caps & hats", group: "Unisex", name: "Fisherman Beanie Set", img: "p52.jpg", price: 2100, sizes: ["One size"], variantLabel: 'Colour', variants: ["Brown", "Black"] },
+    { id: "faux-fur-pom-hat", cat: "Caps & hats", group: "Women", name: "Faux Fur Pom Hat", img: "p27.jpg", price: 3500, sizes: ["One size"] },
+    { id: "flat-ivy-caps", cat: "Caps & hats", group: "Men", name: "Flat Ivy Caps", img: "p6.jpg", price: 3100, sizes: ["S/M", "L/XL"], variantLabel: 'Colour', variants: ["Navy", "Black", "Grey"] }
   ];
 
+  var CATEGORIES = {
+    'New Era': 'Fitted, snapback and adjustable',
+    'Caps & hats': 'Baseball caps, beanies and bucket hats',
+    'Bags': 'Backpacks, handbags and totes'
+  };
+
   var byId = {};
-  PRODUCTS.forEach(function (p) { p.price = p.price || PRICE; byId[p.id] = p; });
+  PRODUCTS.forEach(function (p) {
+    p.cat = p.cat || 'New Era';
+    p.price = p.price || PRICE;
+    p.sizes = p.sizes || STYLES[p.style].sizes;
+    p.tag = p.style ? p.style + ' · ' + STYLES[p.style].label : p.cat + ' · ' + p.group;
+    byId[p.id] = p;
+  });
 
   function fmt(n) { return CURRENCY_LABEL + ' ' + n.toLocaleString('en-KE'); }
   function $(id) { return document.getElementById(id); }
@@ -85,10 +138,12 @@
   function visibleProducts() {
     var q = state.query.trim().toLowerCase();
     var list = PRODUCTS.filter(function (p) {
-      if (state.filter !== 'all' && p.style !== state.filter) return false;
+      if (state.filter !== 'all' && p.cat !== state.filter) return false;
       if (!q) return true;
-      return (p.name + ' ' + p.style + ' ' + STYLES[p.style].label).toLowerCase().indexOf(q) !== -1;
+      return (p.name + ' ' + p.cat + ' ' + p.tag).toLowerCase().indexOf(q) !== -1;
     });
+    if (state.sort === 'price-asc') list.sort(function (a, b) { return a.price - b.price; });
+    if (state.sort === 'price-desc') list.sort(function (a, b) { return b.price - a.price; });
     if (state.sort === 'name') list.sort(function (a, b) { return a.name.localeCompare(b.name); });
     return list;
   }
@@ -99,22 +154,23 @@
     grid.textContent = '';
     list.forEach(function (p) {
       var card = el('article', 'card');
-      if (p.badge) card.appendChild(el('span', 'badge', p.badge));
+      if (p.soldOut || p.badge) card.appendChild(el('span', 'badge', p.soldOut ? 'Sold out' : p.badge));
       var art = el('button', 'card-art');
       art.type = 'button';
       art.setAttribute('aria-label', 'View ' + p.name);
       art.appendChild(photo(p.img, ''));
+      if (!p.style) art.classList.add('contain');
       art.addEventListener('click', function () { openProduct(p.id, art); });
       card.appendChild(art);
 
       var body = el('div', 'card-body');
-      body.appendChild(el('span', 'card-style', p.style + ' · ' + STYLES[p.style].label));
+      body.appendChild(el('span', 'card-style', p.tag));
       body.appendChild(el('h3', 'card-name', p.name));
       var foot = el('div', 'card-foot');
       foot.appendChild(el('p', 'price', fmt(p.price)));
-      var btn = el('button', 'btn btn-primary', 'Choose');
+      var btn = el('button', 'btn btn-primary', p.soldOut ? 'View' : 'Choose');
       btn.type = 'button';
-      btn.setAttribute('aria-label', 'Choose options for ' + p.name);
+      btn.setAttribute('aria-label', (p.soldOut ? 'View ' : 'Choose options for ') + p.name);
       btn.addEventListener('click', function () { openProduct(p.id, btn); });
       foot.appendChild(btn);
       body.appendChild(foot);
@@ -122,7 +178,7 @@
       grid.appendChild(card);
     });
     $('emptyState').hidden = list.length > 0;
-    $('resultCount').textContent = list.length + (list.length === 1 ? ' cap' : ' caps');
+    $('resultCount').textContent = list.length + (list.length === 1 ? ' item' : ' items');
   }
 
   function setFilter(f) {
@@ -135,7 +191,7 @@
 
   function renderFilters() {
     var chips = $('filterChips');
-    [['all', 'All']].concat(Object.keys(STYLES).map(function (s) { return [s, s]; })).forEach(function (pair) {
+    [['all', 'All']].concat(Object.keys(CATEGORIES).map(function (s) { return [s, s]; })).forEach(function (pair) {
       var c = el('button', 'chip', pair[1]);
       c.type = 'button';
       c.dataset.filter = pair[0];
@@ -145,11 +201,11 @@
     });
 
     var sg = $('styleGrid');
-    Object.keys(STYLES).forEach(function (s) {
+    Object.keys(CATEGORIES).forEach(function (s) {
       var card = el('button', 'style-card');
       card.type = 'button';
       card.appendChild(el('strong', null, s));
-      card.appendChild(el('span', null, STYLES[s].label + ' · ' + STYLES[s].blurb));
+      card.appendChild(el('span', null, CATEGORIES[s]));
       card.addEventListener('click', function () {
         setFilter(s);
         $('shop').scrollIntoView();
@@ -204,11 +260,12 @@
 
   function openProduct(id, trigger) {
     var p = byId[id];
-    var sizes = STYLES[p.style].sizes;
+    var sizes = p.sizes;
     current = { id: id, size: sizes.length === 1 ? sizes[0] : null, variant: p.variants ? null : '' };
 
     var art = $('pmArt');
     art.textContent = '';
+    art.classList.toggle('contain', !p.style);
     var main = photo(p.img, p.name);
     main.loading = 'eager';
     art.appendChild(main);
@@ -231,11 +288,14 @@
       art.appendChild(thumbs);
     }
 
-    $('pmStyle').textContent = p.style + ' · ' + STYLES[p.style].label;
+    $('pmStyle').textContent = p.tag;
     $('pmName').textContent = p.name;
     $('pmPrice').textContent = fmt(p.price);
-    $('pmDesc').textContent = p.desc;
+    $('pmDesc').textContent = p.desc || '';
+    $('pmDesc').hidden = !p.desc;
     $('pmError').hidden = true;
+    $('pmAdd').disabled = !!p.soldOut;
+    $('pmAdd').textContent = p.soldOut ? 'Sold out' : 'Add to cart';
 
     $('pmVariantField').hidden = !p.variants;
     if (p.variants) {
@@ -251,7 +311,7 @@
 
   function validLine(i) {
     var p = i && byId[i.id];
-    if (!p || STYLES[p.style].sizes.indexOf(i.size) === -1 || !(i.qty > 0)) return false;
+    if (!p || p.soldOut || p.sizes.indexOf(i.size) === -1 || !(i.qty > 0)) return false;
     return p.variants ? p.variants.indexOf(i.variant) !== -1 : !i.variant;
   }
 
@@ -409,7 +469,6 @@
     checkoutMarkup = $('coBody').innerHTML;
     $('year').textContent = new Date().getFullYear();
     document.querySelector('[data-free-ship]').textContent = fmt(FREE_SHIPPING_OVER);
-    document.querySelector('[data-price]').textContent = fmt(PRICE);
 
     renderFilters();
     renderGrid();

@@ -1,6 +1,6 @@
 # Crown & Brim
 
-A static storefront for selling New Era caps. No build step: open `index.html` in a browser, or serve the folder with any static host.
+A static storefront for selling caps and bags. No build step: open `index.html` in a browser, or serve the folder with any static host.
 
 - `index.html` — page structure
 - `styles.css` — styling

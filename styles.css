@@ -142,6 +142,9 @@ input, select, textarea {
 .card-art { background: #fff; padding: 0; border: 0; cursor: pointer; display: block; width: 100%; overflow: hidden; }
 .card-art img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; transition: transform .35s ease; }
 .card:hover .card-art img { transform: scale(1.05); }
+.card-art.contain img, .pm-art.contain > img { object-fit: contain; background: #fff; }
+.card-art.contain img { padding: .6rem; }
+.btn:disabled { background: var(--line); border-color: var(--line); color: var(--muted); box-shadow: none; cursor: not-allowed; transform: none; }
 .badge {
   position: absolute; top: .8rem; left: .8rem; z-index: 1; background: var(--card); color: var(--accent-deep);
   font-size: .72rem; font-weight: 800; letter-spacing: .06em;

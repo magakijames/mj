@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Crown &amp; Brim — New Era Caps</title>
-  <meta name="description" content="Shop New Era caps: 59FIFTY fitted, 9FIFTY snapback and 9FORTY adjustable.">
+  <title>Crown &amp; Brim — Caps &amp; Bags</title>
+  <meta name="description" content="Shop New Era caps, everyday caps and hats, backpacks and handbags.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
     <a class="logo" href="#top" aria-label="Crown &amp; Brim home">Crown <span>&amp;</span> Brim</a>
     <nav class="nav" aria-label="Main">
       <a href="#shop">Shop</a>
-      <a href="#styles">Styles</a>
+      <a href="#styles">Categories</a>
       <a href="#size-guide">Size guide</a>
       <a href="#faq">FAQ</a>
     </nav>
@@ -29,11 +29,11 @@
   <main id="top">
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">New Era caps · every cap <span data-price></span></p>
-        <h1>Find the cap that <em>fits you</em>.</h1>
-        <p class="lede">Fitted, snapback and adjustable New Era caps in soft pastels, clean classics and one-of-a-kind customs.</p>
+        <p class="eyebrow">Caps &amp; bags for every day</p>
+        <h1>Caps and bags that <em>fit you</em>.</h1>
+        <p class="lede">New Era fitteds and snapbacks, everyday caps and beanies, and backpacks, handbags and totes to go with them.</p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="#shop">Shop all caps</a>
+          <a class="btn btn-primary" href="#shop">Shop everything</a>
           <a class="btn btn-ghost" href="#size-guide">Find your size</a>
         </div>
       </div>
@@ -41,34 +41,36 @@
     </section>
 
     <section class="styles" id="styles">
-      <h2>Shop by style</h2>
+      <h2>Shop by category</h2>
       <div class="style-grid" id="styleGrid"></div>
     </section>
 
     <section class="shop" id="shop">
       <div class="shop-head">
-        <h2>All caps</h2>
+        <h2>Shop all</h2>
         <p class="result-count" id="resultCount" aria-live="polite"></p>
       </div>
       <div class="toolbar">
-        <div class="chips" id="filterChips" role="group" aria-label="Filter by style"></div>
+        <div class="chips" id="filterChips" role="group" aria-label="Filter by category"></div>
         <div class="toolbar-right">
-          <label class="visually-hidden" for="search">Search caps</label>
-          <input type="search" id="search" placeholder="Search caps">
+          <label class="visually-hidden" for="search">Search caps and bags</label>
+          <input type="search" id="search" placeholder="Search caps and bags">
           <label class="visually-hidden" for="sort">Sort</label>
           <select id="sort">
             <option value="featured">Featured</option>
+            <option value="price-asc">Price: low to high</option>
+            <option value="price-desc">Price: high to low</option>
             <option value="name">Name</option>
           </select>
         </div>
       </div>
       <div class="grid" id="productGrid"></div>
-      <p class="empty" id="emptyState" hidden>No caps match that search. Try a different style or clear the search.</p>
+      <p class="empty" id="emptyState" hidden>Nothing matches that search. Try a different category or clear the search.</p>
     </section>
 
     <section class="size-guide" id="size-guide">
-      <h2>Size guide</h2>
-      <p>Measure around your head just above the ears and eyebrows, where the cap will sit. Between two sizes? Go up.</p>
+      <h2>Fitted cap size guide</h2>
+      <p>For New Era 59FIFTY fitted caps. Measure around your head just above the ears and eyebrows, where the cap will sit. Between two sizes? Go up.</p>
       <div class="table-wrap">
         <table>
           <thead>
@@ -92,11 +94,11 @@
     <section class="faq" id="faq">
       <h2>Questions</h2>
       <details>
-        <summary>Are these genuine New Era caps?</summary>
-        <p>Yes. Every cap we sell is an authentic New Era product. Crown &amp; Brim is an independent retailer and is not owned by or affiliated with New Era Cap.</p>
+        <summary>Are the New Era caps genuine?</summary>
+        <p>Yes. Every New Era cap we sell is an authentic New Era product. Crown &amp; Brim is an independent retailer and is not owned by or affiliated with New Era Cap.</p>
       </details>
       <details>
-        <summary>What is the difference between the styles?</summary>
+        <summary>What is the difference between the New Era styles?</summary>
         <p>59FIFTY is a fitted cap with a flat brim and a structured crown, sold by exact head size. 9FIFTY has the same shape with a snapback closure. 9FORTY has a curved brim and an adjustable strap.</p>
       </details>
       <details>
@@ -104,15 +106,15 @@
         <p>Orders placed before 2pm ship the same working day and usually arrive in 2 to 4 working days.</p>
       </details>
       <details>
-        <summary>Can I return a cap that does not fit?</summary>
-        <p>Yes. Send it back unworn with the stickers on within 30 days and we will exchange or refund it.</p>
+        <summary>Can I return something that does not fit?</summary>
+        <p>Yes. Send it back unused with the tags or stickers on within 30 days and we will exchange or refund it.</p>
       </details>
     </section>
   </main>
 
   <footer class="site-footer">
     <p class="logo">Crown <span>&amp;</span> Brim</p>
-    <p>Independent retailer of New Era caps. New Era, 59FIFTY, 9FIFTY and 9FORTY are trademarks of New Era Cap, LLC.</p>
+    <p>Independent retailer of caps and bags. New Era, 59FIFTY, 9FIFTY and 9FORTY are trademarks of New Era Cap, LLC.</p>
     <p>&copy; <span id="year"></span> Crown &amp; Brim</p>
   </footer>
 
