@@ -1,181 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Crown &amp; Brim — Caps &amp; Bags</title>
-  <meta name="description" content="Shop New Era caps, everyday caps and hats, backpacks and handbags.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snap &amp; Pack – Bags &amp; Caps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="promo">Free delivery on orders over <span data-free-ship></span> · 30-day returns</div>
+<div class="topbar">Free shipping on orders over KSh 6,500 · Easy 30-day returns · 10% off your first order</div>
 
-  <header class="site-header">
-    <a class="logo" href="#top" aria-label="Crown &amp; Brim home">Crown <span>&amp;</span> Brim</a>
-    <nav class="nav" aria-label="Main">
-      <a href="#shop">Shop</a>
-      <a href="#styles">Categories</a>
-      <a href="#size-guide">Size guide</a>
-      <a href="#faq">FAQ</a>
-    </nav>
-    <button class="cart-btn" id="cartOpen" aria-haspopup="dialog">
-      Cart <span class="cart-count" id="cartCount">0</span>
-    </button>
-  </header>
+<header class="header">
+  <a class="logo" href="#" onclick="show('store');return false">Snap &amp; Pack<small>Bags &amp; caps for every day</small></a>
+  <div class="search"><input id="q" placeholder="Search bags and caps…"><button onclick="setF('q',$('#q').value)">Search</button></div>
+  <div class="actions">
+    <button class="link" id="accountBtn" onclick="accountClick()">Sign in</button>
+    <button class="link" id="adminLink" hidden onclick="show('admin')">Admin panel</button>
+    <button class="link" id="ordersLink" hidden onclick="show('orders')">My orders</button>
+    <button class="link" onclick="toggleCart(true)">Cart (<span id="cartCount">0</span>)</button>
+  </div>
+</header>
 
-  <main id="top">
-    <section class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">Caps &amp; bags for every day</p>
-        <h1>Caps and bags that <em>fit you</em>.</h1>
-        <p class="lede">New Era fitteds and snapbacks, everyday caps and beanies, and backpacks, handbags and totes to go with them.</p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#shop">Shop everything</a>
-          <a class="btn btn-ghost" href="#size-guide">Find your size</a>
+<!-- STORE -->
+<main id="storeView" class="wrap">
+  <div class="layout">
+    <aside class="side">
+      <h3>Shop by category</h3>
+      <ul id="sideList"></ul>
+    </aside>
+    <section>
+      <div class="hero">
+        <div class="hero-text">
+          <h1>Carry it well.<br>Wear it better.</h1>
+          <p>Backpacks, handbags and caps in the sizes and colours you actually want.</p>
+          <button class="btn light" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">Browse the collection</button>
         </div>
+        <div class="slider" id="slider" aria-label="Featured products"></div>
       </div>
-      <div class="hero-art"><img src="images/cap-wall.jpg" alt="A wall of shelves filled with fitted caps in many colours"></div>
+      <ul class="perks">
+        <li><b>Free shipping</b>On orders over KSh 6,500</li>
+        <li><b>Easy returns</b>30 days, no fuss</li>
+        <li><b>Customer support</b>Here every day</li>
+        <li><b>Secure checkout</b>Your details stay safe</li>
+      </ul>
     </section>
-
-    <section class="styles" id="styles">
-      <h2>Shop by category</h2>
-      <div class="style-grid" id="styleGrid"></div>
-    </section>
-
-    <section class="shop" id="shop">
-      <div class="shop-head">
-        <h2>Shop all</h2>
-        <p class="result-count" id="resultCount" aria-live="polite"></p>
-      </div>
-      <div class="toolbar">
-        <div class="chips" id="filterChips" role="group" aria-label="Filter by category"></div>
-        <div class="toolbar-right">
-          <label class="visually-hidden" for="search">Search caps and bags</label>
-          <input type="search" id="search" placeholder="Search caps and bags">
-          <label class="visually-hidden" for="sort">Sort</label>
-          <select id="sort">
-            <option value="featured">Featured</option>
-            <option value="price-asc">Price: low to high</option>
-            <option value="price-desc">Price: high to low</option>
-            <option value="name">Name</option>
-          </select>
-        </div>
-      </div>
-      <div class="grid" id="productGrid"></div>
-      <p class="empty" id="emptyState" hidden>Nothing matches that search. Try a different category or clear the search.</p>
-    </section>
-
-    <section class="size-guide" id="size-guide">
-      <h2>Fitted cap size guide</h2>
-      <p>For New Era 59FIFTY fitted caps. Measure around your head just above the ears and eyebrows, where the cap will sit. Between two sizes? Go up.</p>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Fitted size</th><th>Head (cm)</th><th>Head (in)</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>6 7/8</td><td>54.9</td><td>21 5/8</td></tr>
-            <tr><td>7</td><td>55.8</td><td>22</td></tr>
-            <tr><td>7 1/8</td><td>56.8</td><td>22 3/8</td></tr>
-            <tr><td>7 1/4</td><td>57.7</td><td>22 3/4</td></tr>
-            <tr><td>7 3/8</td><td>58.7</td><td>23 1/8</td></tr>
-            <tr><td>7 1/2</td><td>59.6</td><td>23 1/2</td></tr>
-            <tr><td>7 5/8</td><td>60.6</td><td>23 7/8</td></tr>
-            <tr><td>7 3/4</td><td>61.5</td><td>24 1/4</td></tr>
-            <tr><td>8</td><td>63.5</td><td>25</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="faq" id="faq">
-      <h2>Questions</h2>
-      <details>
-        <summary>Are the New Era caps genuine?</summary>
-        <p>Yes. Every New Era cap we sell is an authentic New Era product. Crown &amp; Brim is an independent retailer and is not owned by or affiliated with New Era Cap.</p>
-      </details>
-      <details>
-        <summary>What is the difference between the New Era styles?</summary>
-        <p>59FIFTY is a fitted cap with a flat brim and a structured crown, sold by exact head size. 9FIFTY has the same shape with a snapback closure. 9FORTY has a curved brim and an adjustable strap.</p>
-      </details>
-      <details>
-        <summary>How long does delivery take?</summary>
-        <p>Orders placed before 2pm ship the same working day and usually arrive in 2 to 4 working days.</p>
-      </details>
-      <details>
-        <summary>Can I return something that does not fit?</summary>
-        <p>Yes. Send it back unused with the tags or stickers on within 30 days and we will exchange or refund it.</p>
-      </details>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <p class="logo">Crown <span>&amp;</span> Brim</p>
-    <p>Independent retailer of caps and bags. New Era, 59FIFTY, 9FIFTY and 9FORTY are trademarks of New Era Cap, LLC.</p>
-    <p>&copy; <span id="year"></span> Crown &amp; Brim</p>
-  </footer>
-
-  <div class="overlay" id="overlay" hidden></div>
-
-  <!-- Product detail -->
-  <div class="modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="pmName" hidden>
-    <button class="close" data-close aria-label="Close">&times;</button>
-    <div class="pm-art" id="pmArt"></div>
-    <div class="pm-info">
-      <p class="eyebrow" id="pmStyle"></p>
-      <h3 id="pmName"></h3>
-      <p class="price" id="pmPrice"></p>
-      <p id="pmDesc"></p>
-      <fieldset id="pmVariantField" hidden>
-        <legend id="pmVariantLegend"></legend>
-        <div class="sizes" id="pmVariants"></div>
-      </fieldset>
-      <fieldset>
-        <legend>Size</legend>
-        <div class="sizes" id="pmSizes"></div>
-      </fieldset>
-      <p class="form-error" id="pmError" role="alert" hidden></p>
-      <button class="btn btn-primary btn-block" id="pmAdd">Add to cart</button>
-    </div>
   </div>
 
-  <!-- Cart -->
-  <aside class="drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-labelledby="cartTitle" hidden>
-    <div class="drawer-head">
-      <h3 id="cartTitle">Your cart</h3>
-      <button class="close" data-close aria-label="Close">&times;</button>
-    </div>
-    <div class="drawer-body" id="cartItems"></div>
-    <div class="drawer-foot" id="cartFoot">
-      <div class="row"><span>Subtotal</span><span id="cartSubtotal"></span></div>
-      <div class="row"><span>Delivery</span><span id="cartShipping"></span></div>
-      <div class="row total"><span>Total</span><span id="cartTotal"></span></div>
-      <button class="btn btn-primary btn-block" id="checkoutOpen">Checkout</button>
-    </div>
-  </aside>
+  <div class="marquee" aria-label="Product photos"><div class="track" id="track"></div></div>
 
-  <!-- Checkout -->
-  <div class="modal modal-narrow" id="checkoutModal" role="dialog" aria-modal="true" aria-labelledby="coTitle" hidden>
-    <button class="close" data-close aria-label="Close">&times;</button>
-    <div class="co-body" id="coBody">
-      <h3 id="coTitle">Checkout</h3>
-      <p class="muted">Total to pay on delivery: <strong id="coTotal"></strong></p>
-      <form id="checkoutForm" novalidate>
-        <label>Full name <input name="name" autocomplete="name" required></label>
-        <label>Email <input name="email" type="email" autocomplete="email" required></label>
-        <label>Phone <input name="phone" type="tel" autocomplete="tel" required></label>
-        <label>Delivery address <textarea name="address" rows="3" autocomplete="street-address" required></textarea></label>
-        <p class="form-error" id="coError" role="alert" hidden></p>
-        <button class="btn btn-primary btn-block" type="submit">Place order</button>
-      </form>
-    </div>
+  <h2 id="shop">Shop all</h2>
+  <div class="filters">
+    <select id="fCat" onchange="setF('cat',this.value)"></select>
+    <select id="fGender" onchange="setF('gender',this.value)"></select>
+    <select id="fColor" onchange="setF('color',this.value)"></select>
+    <select id="fSize" onchange="setF('size',this.value)"></select>
+    <button class="link" onclick="clearF()">Clear filters</button>
   </div>
+  <div id="grid" class="grid"></div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="newsletter">
+    <div><b>Join the Snap &amp; Pack community</b><br>New arrivals and offers straight to your inbox.</div>
+    <form onsubmit="event.preventDefault();toast('Subscribed. Thank you!');this.reset()"><input type="email" required placeholder="Enter your email address"><button class="btn">Subscribe</button></form>
+  </div>
+</main>
 
-  <script src="app.js"></script>
+<!-- CLIENT ORDERS -->
+<main id="ordersView" class="wrap" hidden>
+  <h2>My orders</h2>
+  <div id="myOrders"></div>
+</main>
+
+<!-- ADMIN -->
+<main id="adminView" class="wrap" hidden>
+  <h2>Admin panel</h2>
+  <div class="stats" id="stats"></div>
+  <div class="tabs">
+    <button onclick="adminTab('products')" data-t="products">Products</button>
+    <button onclick="adminTab('orders')" data-t="orders">Orders</button>
+    <button onclick="adminTab('users')" data-t="users">Customers</button>
+  </div>
+  <div id="adminBody"></div>
+</main>
+
+<footer class="footer">
+  <div><b>Snap &amp; Pack</b><p>Your one-stop shop for bags and caps.</p></div>
+  <div><b>Shop</b><p>Bags<br>Caps<br>Men · Women · Kids</p></div>
+  <div><b>Help</b><p>Track order<br>Returns &amp; refunds<br>Size guide</p></div>
+  <div><b>Company</b><p>About us<br>Contact us</p></div>
+  <small>© 2026 Snap &amp; Pack. All rights reserved.</small>
+</footer>
+
+<!-- CART DRAWER -->
+<div id="cart" class="drawer" hidden>
+  <div class="drawer-head"><b>Your cart</b><button class="link" onclick="toggleCart(false)">Close</button></div>
+  <div id="cartItems"></div>
+  <div class="drawer-foot"><div class="total">Total: <b id="cartTotal">KSh 0</b></div><button class="btn" onclick="checkout()">Checkout</button></div>
+</div>
+
+<!-- AUTH MODAL -->
+<div id="authModal" class="modal" hidden>
+  <div class="box">
+    <h3 id="authTitle">Sign in</h3>
+    <form id="authForm">
+      <input id="aName" placeholder="Full name" hidden>
+      <input id="aEmail" type="email" placeholder="Email" required>
+      <input id="aPass" type="password" placeholder="Password (min 6 characters)" minlength="6" required>
+      <p class="err" id="authErr"></p>
+      <button class="btn" id="authSubmit">Sign in</button>
+    </form>
+    <p class="swap"><span id="authSwapText">New here?</span> <a href="#" id="authSwap">Create an account</a></p>
+    <button class="link" onclick="$('#authModal').hidden=true">Cancel</button>
+  </div>
+</div>
+
+<!-- PRODUCT FORM MODAL (admin) -->
+<div id="prodModal" class="modal" hidden>
+  <div class="box">
+    <h3 id="pTitle">Add product</h3>
+    <form id="prodForm">
+      <input id="pName" placeholder="Product name" required>
+      <select id="pCat"><option>Bag</option><option>Cap</option></select>
+      <select id="pGender"><option>Men</option><option>Women</option><option>Unisex</option><option>Kids</option></select>
+      <input id="pColors" placeholder="Colours, comma separated (Black, Navy, Beige)" required>
+      <input id="pSizes" placeholder="Sizes, comma separated (S, M, L)" required>
+      <input id="pPrice" type="number" step="1" min="0" placeholder="Price in KSh" required>
+      <input id="pStock" type="number" min="0" placeholder="Stock quantity" required>
+      <input id="pEmoji" placeholder="Image path or URL (e.g. images/p12.jpg)">
+      <button class="btn">Save product</button>
+    </form>
+    <button class="link" onclick="$('#prodModal').hidden=true">Cancel</button>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+<script src="app.js"></script>
 </body>
 </html>

@@ -1,11 +1,12 @@
-# Crown & Brim
+# Snap & Pack
 
-A static storefront for selling caps and bags. No build step: open `index.html` in a browser, or serve the folder with any static host.
+A static storefront for selling bags and caps. No build step: open `index.html` in a browser, or serve the folder with any static host.
 
 - `index.html` — page structure
-- `styles.css` — styling
-- `app.js` — catalogue, filters, cart and checkout
+- `style.css` — styling
+- `app.js` — products, filters, cart, sign-in, orders and the admin panel
+- `images/` — product photos
 
-To change the caps, prices, currency or delivery fee, edit the settings and `PRODUCTS` list at the top of `app.js`.
+Prices are in Kenyan shillings (KSh). The starting products are the `SEED` list at the top of `app.js`; after first load, products are edited from the admin panel.
 
-Checkout confirms the order on screen only. Connect a server or payment provider in `submitOrder` in `app.js` before taking real orders.
+This is a front end only. Products, accounts, carts and orders are stored in each visitor's own browser (`localStorage`), so orders do not reach the shop and the sign-in is not real security. Connect a server and a payment provider before taking real orders.

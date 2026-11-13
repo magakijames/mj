@@ -1,507 +1,273 @@
-(function () {
-  'use strict';
+/* Snap & Pack – Bags & Caps. Frontend only: data lives in the browser (localStorage). */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => 'KSh ' + Math.round(Number(n)).toLocaleString('en-KE');
+const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
-  // ---- Store settings: edit these to match your shop ----
-  var CURRENCY_LABEL = 'KSh';
-  var FREE_SHIPPING_OVER = 5000;
-  var SHIPPING_FEE = 300;
-  var PRICE = 1500;
-  var CART_KEY = 'crownbrim.cart.v2';
+const COLORS = {Black:'#222',Green:'#1f6b4a',Navy:'#1f3a5f',Beige:'#d8c3a5',Red:'#c0392b',Grey:'#888',White:'#fff',Pink:'#f4a6a6',Blue:'#3b6fb6',Cream:'#efe6d2',Stone:'#cfc6c4','Sky blue':'#8fc1e6',Purple:'#6b3fa0',Brown:'#7a5230',Khaki:'#b5a36a'};
 
-  var FITTED = ['6 7/8', '7', '7 1/8', '7 1/4', '7 3/8', '7 1/2', '7 5/8', '7 3/4', '8'];
-  var ONE = ['One size'];
+const SEED = [
+  {"id": 1, "name": "Anti-Theft Laptop Backpack", "category": "Bag", "gender": "Unisex", "colors": ["Grey", "Black"], "sizes": ["M", "L"], "price": 7800, "stock": 24, "image": "images/p0.jpg"},
+  {"id": 2, "name": "USB Travel Backpack", "category": "Bag", "gender": "Unisex", "colors": ["Black"], "sizes": ["L"], "price": 7150, "stock": 30, "image": "images/p18.jpg"},
+  {"id": 3, "name": "Everyday Casual Backpack", "category": "Bag", "gender": "Men", "colors": ["Grey", "Black", "Navy"], "sizes": ["M", "L"], "price": 5200, "stock": 28, "image": "images/p44.jpg"},
+  {"id": 4, "name": "Minimal Backpack", "category": "Bag", "gender": "Unisex", "colors": ["Navy", "Black", "Green"], "sizes": ["M", "L"], "price": 6500, "stock": 30, "image": "images/p54.jpg"},
+  {"id": 5, "name": "Quilted Leather Backpack", "category": "Bag", "gender": "Women", "colors": ["Brown", "Black"], "sizes": ["M"], "price": 8450, "stock": 15, "image": "images/p48.jpg"},
+  {"id": 6, "name": "Burgundy Leather Backpack", "category": "Bag", "gender": "Women", "colors": ["Red", "Brown"], "sizes": ["M"], "price": 9100, "stock": 10, "image": "images/p55.jpg"},
+  {"id": 7, "name": "Unicorn Kids Backpack", "category": "Bag", "gender": "Kids", "colors": ["Pink"], "sizes": ["S"], "price": 3900, "stock": 20, "image": "images/p32.jpg"},
+  {"id": 8, "name": "Checkered Crossbody Bag", "category": "Bag", "gender": "Men", "colors": ["Grey", "Black"], "sizes": ["S"], "price": 3250, "stock": 22, "image": "images/p2.jpg"},
+  {"id": 9, "name": "Leather Messenger Bag", "category": "Bag", "gender": "Men", "colors": ["Black"], "sizes": ["S", "M"], "price": 5850, "stock": 14, "image": "images/p36.jpg"},
+  {"id": 10, "name": "Gym Duffel Bag", "category": "Bag", "gender": "Men", "colors": ["Black"], "sizes": ["M", "L"], "price": 5500, "stock": 18, "image": "images/p11.jpg"},
+  {"id": 11, "name": "Navy Gold-Trim Handbag", "category": "Bag", "gender": "Women", "colors": ["Navy"], "sizes": ["M"], "price": 9750, "stock": 8, "image": "images/p3.jpg"},
+  {"id": 12, "name": "Navy Classic Handbag", "category": "Bag", "gender": "Women", "colors": ["Navy", "Black"], "sizes": ["M"], "price": 9100, "stock": 12, "image": "images/p7.jpg"},
+  {"id": 13, "name": "Blush Structured Tote", "category": "Bag", "gender": "Women", "colors": ["Beige", "Pink"], "sizes": ["M", "L"], "price": 7800, "stock": 16, "image": "images/p9.jpg"},
+  {"id": 14, "name": "Pink Satchel Handbag", "category": "Bag", "gender": "Women", "colors": ["Pink", "Black"], "sizes": ["M"], "price": 7150, "stock": 20, "image": "images/p17.jpg"},
+  {"id": 15, "name": "Mini Pink Crossbody", "category": "Bag", "gender": "Women", "colors": ["Pink"], "sizes": ["S"], "price": 4550, "stock": 25, "image": "images/p16.jpg"},
+  {"id": 16, "name": "Grey Handbag with Purse", "category": "Bag", "gender": "Women", "colors": ["Grey", "Beige"], "sizes": ["M"], "price": 10400, "stock": 9, "image": "images/p26.jpg"},
+  {"id": 17, "name": "3-Piece Handbag Set", "category": "Bag", "gender": "Women", "colors": ["Navy", "Brown"], "sizes": ["M", "L"], "price": 11050, "stock": 6, "image": "images/p25.jpg"},
+  {"id": 18, "name": "Black Tassel Handbag", "category": "Bag", "gender": "Women", "colors": ["Black"], "sizes": ["M"], "price": 6500, "stock": 18, "image": "images/p40.jpg"},
+  {"id": 19, "name": "Black Bow Work Tote", "category": "Bag", "gender": "Women", "colors": ["Black"], "sizes": ["L"], "price": 7550, "stock": 11, "image": "images/p47.jpg"},
+  {"id": 20, "name": "Brown Saddle Crossbody", "category": "Bag", "gender": "Women", "colors": ["Brown"], "sizes": ["S"], "price": 5050, "stock": 20, "image": "images/p43.jpg"},
+  {"id": 21, "name": "Woven Leather Tote", "category": "Bag", "gender": "Women", "colors": ["Brown"], "sizes": ["L"], "price": 11700, "stock": 7, "image": "images/p50.jpg"},
+  {"id": 22, "name": "Black Work Tote", "category": "Bag", "gender": "Women", "colors": ["Black"], "sizes": ["L"], "price": 9500, "stock": 10, "image": "images/p51.jpg"},
+  {"id": 23, "name": "Classic Baseball Cap", "category": "Cap", "gender": "Unisex", "colors": ["Black", "Navy", "Grey"], "sizes": ["S/M", "L/XL"], "price": 2600, "stock": 60, "image": "images/p12.jpg"},
+  {"id": 24, "name": "Sport Mesh Cap", "category": "Cap", "gender": "Men", "colors": ["Black", "Grey", "Navy"], "sizes": ["S/M", "L/XL"], "price": 2850, "stock": 40, "image": "images/p29.jpg"},
+  {"id": 25, "name": "Embroidered Cross Cap", "category": "Cap", "gender": "Unisex", "colors": ["Black"], "sizes": ["One size"], "price": 3000, "stock": 35, "image": "images/p46.jpg"},
+  {"id": 26, "name": "Quilted Leather Cap", "category": "Cap", "gender": "Men", "colors": ["Black", "Navy"], "sizes": ["One size"], "price": 3900, "stock": 15, "image": "images/p41.jpg"},
+  {"id": 27, "name": "Red Fade Baseball Cap", "category": "Cap", "gender": "Women", "colors": ["Red", "White"], "sizes": ["One size"], "price": 2450, "stock": 30, "image": "images/p49.jpg"},
+  {"id": 28, "name": "Flat Brim Snapback", "category": "Cap", "gender": "Men", "colors": ["Black", "Beige", "Blue", "Red", "White"], "sizes": ["One size"], "price": 3000, "stock": 0, "image": "images/p19.jpg"},
+  {"id": 29, "name": "Brimless Docker Cap", "category": "Cap", "gender": "Men", "colors": ["Black"], "sizes": ["One size"], "price": 2200, "stock": 45, "image": "images/p21.jpg"},
+  {"id": 30, "name": "Sports Brimless Cap", "category": "Cap", "gender": "Unisex", "colors": ["Beige", "Grey", "Green", "Navy"], "sizes": ["One size"], "price": 2350, "stock": 38, "image": "images/p24.jpg"},
+  {"id": 31, "name": "Bucket Hat", "category": "Cap", "gender": "Unisex", "colors": ["Black"], "sizes": ["S/M", "L/XL"], "price": 3250, "stock": 22, "image": "images/p10.jpg"},
+  {"id": 32, "name": "Camo Army Cap", "category": "Cap", "gender": "Men", "colors": ["Green", "Khaki"], "sizes": ["One size"], "price": 2600, "stock": 26, "image": "images/p31.jpg"},
+  {"id": 33, "name": "Mesh Army Cap", "category": "Cap", "gender": "Men", "colors": ["Green"], "sizes": ["One size"], "price": 2450, "stock": 30, "image": "images/p35.jpg"},
+  {"id": 34, "name": "Graffiti Print Cap", "category": "Cap", "gender": "Unisex", "colors": ["Black", "White"], "sizes": ["One size"], "price": 2750, "stock": 20, "image": "images/p39.jpg"},
+  {"id": 35, "name": "Ribbed Beanie", "category": "Cap", "gender": "Unisex", "colors": ["Black"], "sizes": ["One size"], "price": 1950, "stock": 50, "image": "images/p15.jpg"},
+  {"id": 36, "name": "Fisherman Beanie Set", "category": "Cap", "gender": "Unisex", "colors": ["Brown", "Black"], "sizes": ["One size"], "price": 2100, "stock": 40, "image": "images/p52.jpg"},
+  {"id": 37, "name": "Faux Fur Pom Hat", "category": "Cap", "gender": "Women", "colors": ["Grey"], "sizes": ["One size"], "price": 3500, "stock": 14, "image": "images/p27.jpg"},
+  {"id": 38, "name": "Flat Ivy Caps", "category": "Cap", "gender": "Men", "colors": ["Navy", "Black", "Grey"], "sizes": ["S/M", "L/XL"], "price": 3100, "stock": 18, "image": "images/p6.jpg"},
+  {"id": 39, "name": "New Era Pink NY Custom Fitted", "category": "Cap", "gender": "Unisex", "colors": ["Pink"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/pink-ny-custom.jpg"},
+  {"id": 40, "name": "New Era Sox Flames Fitted", "category": "Cap", "gender": "Unisex", "colors": ["Black", "Pink"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/sox-flames.jpg"},
+  {"id": 41, "name": "New Era Blackout LA Fitted", "category": "Cap", "gender": "Unisex", "colors": ["Black"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/blackout-la-ny.jpg"},
+  {"id": 42, "name": "New Era Blackout NY Fitted", "category": "Cap", "gender": "Unisex", "colors": ["Black"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/blackout-la-ny.jpg"},
+  {"id": 43, "name": "New Era Sox Roses Fitted", "category": "Cap", "gender": "Unisex", "colors": ["Black"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/sox-roses.jpg"},
+  {"id": 44, "name": "New Era NY Cherry Blossom Snapback", "category": "Cap", "gender": "Unisex", "colors": ["Black", "Stone"], "sizes": ["One size"], "price": 1500, "stock": 20, "image": "images/ny-cherry-blossom.jpg"},
+  {"id": 45, "name": "New Era Cream & Black NY Adjustable", "category": "Cap", "gender": "Unisex", "colors": ["Cream"], "sizes": ["One size"], "price": 1500, "stock": 20, "image": "images/cream-black-ny-la.jpg"},
+  {"id": 46, "name": "New Era Cream & Black LA Adjustable", "category": "Cap", "gender": "Unisex", "colors": ["Cream"], "sizes": ["One size"], "price": 1500, "stock": 20, "image": "images/cream-black-ny-la.jpg"},
+  {"id": 47, "name": "New Era NY Black Snapback with Gold Pin", "category": "Cap", "gender": "Unisex", "colors": ["Black"], "sizes": ["One size"], "price": 1500, "stock": 20, "image": "images/ny-black-pin-snapback.jpg"},
+  {"id": 48, "name": "New Era NY Cream & Navy Star Patch Fitted", "category": "Cap", "gender": "Unisex", "colors": ["Cream"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/ny-cream-navy-star.jpg"},
+  {"id": 49, "name": "New Era NY White & Navy Fitted", "category": "Cap", "gender": "Unisex", "colors": ["White"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/ny-white-navy.jpg"},
+  {"id": 50, "name": "New Era NY Black Low Profile Fitted", "category": "Cap", "gender": "Unisex", "colors": ["Black"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/ny-black-low-profile.jpg"},
+  {"id": 51, "name": "New Era NY Sky Blue & Red Fitted", "category": "Cap", "gender": "Unisex", "colors": ["Sky blue"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/ny-sky-red.jpg"},
+  {"id": 52, "name": "New Era NY White & Purple Fitted", "category": "Cap", "gender": "Unisex", "colors": ["White"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/ny-white-purple.jpg"},
+  {"id": 53, "name": "New Era NY Royal Blue Fitted", "category": "Cap", "gender": "Unisex", "colors": ["Blue"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/ny-royal-blue.jpg"},
+  {"id": 54, "name": "New Era Mets Royal Fitted", "category": "Cap", "gender": "Unisex", "colors": ["Blue"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/mets-royal.jpg"},
+  {"id": 55, "name": "New Era Mets Champions Script Fitted", "category": "Cap", "gender": "Unisex", "colors": ["Blue"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/mets-champions-script.jpg"},
+  {"id": 56, "name": "New Era Mets Little League Classic 2025 Fitted", "category": "Cap", "gender": "Unisex", "colors": ["Blue"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/mets-little-league-classic.jpg"},
+  {"id": 57, "name": "New Era Mets Postseason 2022 Fitted", "category": "Cap", "gender": "Unisex", "colors": ["Blue"], "sizes": ["6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "8"], "price": 1500, "stock": 20, "image": "images/mets-postseason-2022.jpg"}
+];
 
-  var STYLES = {
-    '59FIFTY': { label: 'Fitted', blurb: 'Flat brim, exact sizes', sizes: FITTED },
-    '9FIFTY': { label: 'Snapback', blurb: 'Flat brim, snap closure', sizes: ONE },
-    '9FORTY': { label: 'Adjustable', blurb: 'Curved brim, strap back', sizes: ONE }
-  };
+let products = load('zv_products3', null) || (save('zv_products3', SEED), SEED);
+let users = load('zv_users', null) || (save('zv_users', [{id:1,name:'Admin',email:'admin@store.com',password:'admin123',role:'admin'}]), load('zv_users'));
+let orders = load('zv_orders', []);
+let cart = load('zv_cart', []);
+let session = load('zv_session', null);
+let F = {cat:'', gender:'', color:'', size:'', q:''};
+let editingId = null, authMode = 'in', tab = 'products';
 
-  // ---- Catalogue: add, remove or reprice products here ----
-  // New Era caps take their sizes from `style` and cost PRICE unless given a `price`.
-  // `variants` is optional: use it for colours, or when one photo shows more than one cap.
-  var PRODUCTS = [
-    { id: 'pink-ny-custom', style: '59FIFTY', name: 'Pink NY Custom Fitted', img: 'pink-ny-custom.jpg', badge: 'Limited',
-      desc: 'Soft pink crown and brim with a white NY logo, a 1997 side patch and custom embroidery on the front panel.' },
-    { id: 'sox-flames', style: '59FIFTY', name: 'Sox Flames Fitted', img: 'sox-flames.jpg', badge: 'Popular',
-      variantLabel: 'Colour', variants: ['Black', 'Pink'],
-      desc: 'A ring of embroidered flames climbing the crown behind a raised white Sox logo. Comes in black with red flames or pink with magenta flames.' },
-    { id: 'blackout-la-ny', style: '59FIFTY', name: 'Blackout Fitted', img: 'blackout-la-ny.jpg',
-      variantLabel: 'Logo', variants: ['LA, grey undervisor', 'NY, red undervisor'],
-      desc: 'Black on black: a tonal raised logo on a black crown, with a contrast undervisor that only shows when you tip the brim.' },
-    { id: 'sox-roses', style: '59FIFTY', name: 'Sox Roses Fitted', img: 'sox-roses.jpg', badge: 'Popular',
-      desc: 'Black fitted with a white Sox logo, embroidered red roses and a bee on the front, and champions script on the side.' },
-    { id: 'ny-cherry-blossom', style: '9FIFTY', name: 'NY Cherry Blossom Snapback', img: 'ny-cherry-blossom.jpg', badge: 'New',
-      variantLabel: 'Colour', variants: ['Black', 'Stone'],
-      desc: 'A white NY logo with a pink cherry blossom branch stitched across it and petals falling over the crown.' },
-    { id: 'cream-black', style: '9FORTY', name: 'Cream & Black Adjustable', img: 'cream-black-ny-la.jpg',
-      variantLabel: 'Logo', variants: ['NY', 'LA'],
-      desc: 'Cream crown, black curved brim and a green undervisor, finished with a commemorative patch on the side.' },
-    { id: 'ny-black-pin', style: '9FIFTY', name: 'NY Black Snapback with Gold Pin', img: 'ny-black-pin-snapback.jpg',
-      desc: 'The classic black snapback with a white NY logo, set off by a small gold pin on the front panel.' },
-    { id: 'ny-cream-navy', style: '59FIFTY', name: 'NY Cream & Navy Star Patch Fitted', img: 'ny-cream-navy-star.jpg', badge: 'New',
-      desc: 'Cream crown with a navy brim, button and NY logo, plus a gold-stitched star patch on the side.' },
-    { id: 'ny-white-navy', style: '59FIFTY', name: 'NY White & Navy Fitted', img: 'ny-white-navy.jpg',
-      desc: 'Clean white crown with a navy brim, button and NY logo. Crisp, simple and easy to wear.' },
-    { id: 'ny-black-low', style: '59FIFTY', name: 'NY Black Low Profile Fitted', img: 'ny-black-low-profile.jpg',
-      desc: 'Black fitted with a white NY logo, in the low profile shape: a shallower crown and a gently curved brim.' },
-    { id: 'ny-sky-red', style: '59FIFTY', name: 'NY Sky Blue & Red Fitted', img: 'ny-sky-red.jpg',
-      desc: 'Sky blue crown with a red brim and button, and a white NY logo outlined in red.' },
-    { id: 'ny-white-purple', style: '59FIFTY', name: 'NY White & Purple Fitted', img: 'ny-white-purple.jpg', more: ['ny-white-purple-front.jpg'],
-      desc: 'White crown with a purple brim, a green NY logo outlined in purple and a matching World Series side patch.' },
-    { id: 'ny-royal', style: '59FIFTY', name: 'NY Royal Blue Fitted', img: 'ny-royal-blue.jpg',
-      desc: 'Royal blue from button to brim with a white NY logo.' },
-    { id: 'mets-royal', style: '59FIFTY', name: 'Mets Royal Fitted', img: 'mets-royal.jpg',
-      desc: 'The royal blue Mets cap with the orange NY logo and an orange button.' },
-    { id: 'mets-script', style: '59FIFTY', name: 'Mets Champions Script Fitted', img: 'mets-champions-script.jpg',
-      desc: 'Royal blue Mets fitted with an orange logo and champions script embroidered down the side.' },
-    { id: 'mets-llc', style: '59FIFTY', name: 'Mets Little League Classic 2025 Fitted', img: 'mets-little-league-classic.jpg',
-      desc: 'Royal blue Mets fitted with the 2025 Little League Classic patch on the side.' },
-    { id: 'mets-post', style: '59FIFTY', name: 'Mets Postseason 2022 Fitted', img: 'mets-postseason-2022.jpg',
-      desc: 'Royal blue Mets fitted with the 2022 Postseason patch on the side.' },
+const isAdmin = () => session && session.role === 'admin';
+const saveAll = () => { save('zv_products3', products); save('zv_users', users); save('zv_orders', orders); save('zv_cart', cart); };
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2200); }
 
-    // Bags, and caps and hats from other makers. Prices are in KSh.
-    { id: "anti-theft-laptop-backpack", cat: "Bags", group: "Unisex", name: "Anti-Theft Laptop Backpack", img: "p0.jpg", price: 7800, sizes: ["M", "L"], variantLabel: 'Colour', variants: ["Grey", "Black"] },
-    { id: "usb-travel-backpack", cat: "Bags", group: "Unisex", name: "USB Travel Backpack", img: "p18.jpg", price: 7150, sizes: ["L"] },
-    { id: "everyday-casual-backpack", cat: "Bags", group: "Men", name: "Everyday Casual Backpack", img: "p44.jpg", price: 5200, sizes: ["M", "L"], variantLabel: 'Colour', variants: ["Grey", "Black", "Navy"] },
-    { id: "minimal-backpack", cat: "Bags", group: "Unisex", name: "Minimal Backpack", img: "p54.jpg", price: 6500, sizes: ["M", "L"], variantLabel: 'Colour', variants: ["Navy", "Black", "Green"] },
-    { id: "quilted-leather-backpack", cat: "Bags", group: "Women", name: "Quilted Leather Backpack", img: "p48.jpg", price: 8450, sizes: ["M"], variantLabel: 'Colour', variants: ["Brown", "Black"] },
-    { id: "burgundy-leather-backpack", cat: "Bags", group: "Women", name: "Burgundy Leather Backpack", img: "p55.jpg", price: 9100, sizes: ["M"], variantLabel: 'Colour', variants: ["Red", "Brown"] },
-    { id: "unicorn-kids-backpack", cat: "Bags", group: "Kids", name: "Unicorn Kids Backpack", img: "p32.jpg", price: 3900, sizes: ["S"] },
-    { id: "checkered-crossbody-bag", cat: "Bags", group: "Men", name: "Checkered Crossbody Bag", img: "p2.jpg", price: 3250, sizes: ["S"], variantLabel: 'Colour', variants: ["Grey", "Black"] },
-    { id: "leather-messenger-bag", cat: "Bags", group: "Men", name: "Leather Messenger Bag", img: "p36.jpg", price: 5850, sizes: ["S", "M"] },
-    { id: "gym-duffel-bag", cat: "Bags", group: "Men", name: "Gym Duffel Bag", img: "p11.jpg", price: 5500, sizes: ["M", "L"] },
-    { id: "navy-gold-trim-handbag", cat: "Bags", group: "Women", name: "Navy Gold-Trim Handbag", img: "p3.jpg", price: 9750, sizes: ["M"] },
-    { id: "navy-classic-handbag", cat: "Bags", group: "Women", name: "Navy Classic Handbag", img: "p7.jpg", price: 9100, sizes: ["M"], variantLabel: 'Colour', variants: ["Navy", "Black"] },
-    { id: "blush-structured-tote", cat: "Bags", group: "Women", name: "Blush Structured Tote", img: "p9.jpg", price: 7800, sizes: ["M", "L"], variantLabel: 'Colour', variants: ["Beige", "Pink"] },
-    { id: "pink-satchel-handbag", cat: "Bags", group: "Women", name: "Pink Satchel Handbag", img: "p17.jpg", price: 7150, sizes: ["M"], variantLabel: 'Colour', variants: ["Pink", "Black"] },
-    { id: "mini-pink-crossbody", cat: "Bags", group: "Women", name: "Mini Pink Crossbody", img: "p16.jpg", price: 4550, sizes: ["S"] },
-    { id: "grey-handbag-with-purse", cat: "Bags", group: "Women", name: "Grey Handbag with Purse", img: "p26.jpg", price: 10400, sizes: ["M"], variantLabel: 'Colour', variants: ["Grey", "Beige"] },
-    { id: "3-piece-handbag-set", cat: "Bags", group: "Women", name: "3-Piece Handbag Set", img: "p25.jpg", price: 11050, sizes: ["M", "L"], variantLabel: 'Colour', variants: ["Navy", "Brown"] },
-    { id: "black-tassel-handbag", cat: "Bags", group: "Women", name: "Black Tassel Handbag", img: "p40.jpg", price: 6500, sizes: ["M"] },
-    { id: "black-bow-work-tote", cat: "Bags", group: "Women", name: "Black Bow Work Tote", img: "p47.jpg", price: 7550, sizes: ["L"] },
-    { id: "brown-saddle-crossbody", cat: "Bags", group: "Women", name: "Brown Saddle Crossbody", img: "p43.jpg", price: 5050, sizes: ["S"] },
-    { id: "woven-leather-tote", cat: "Bags", group: "Women", name: "Woven Leather Tote", img: "p50.jpg", price: 11700, sizes: ["L"] },
-    { id: "black-work-tote", cat: "Bags", group: "Women", name: "Black Work Tote", img: "p51.jpg", price: 9500, sizes: ["L"] },
-    { id: "classic-baseball-cap", cat: "Caps & hats", group: "Unisex", name: "Classic Baseball Cap", img: "p12.jpg", price: 2600, sizes: ["S/M", "L/XL"], variantLabel: 'Colour', variants: ["Black", "Navy", "Grey"] },
-    { id: "sport-mesh-cap", cat: "Caps & hats", group: "Men", name: "Sport Mesh Cap", img: "p29.jpg", price: 2850, sizes: ["S/M", "L/XL"], variantLabel: 'Colour', variants: ["Black", "Grey", "Navy"] },
-    { id: "embroidered-cross-cap", cat: "Caps & hats", group: "Unisex", name: "Embroidered Cross Cap", img: "p46.jpg", price: 3000, sizes: ["One size"] },
-    { id: "quilted-leather-cap", cat: "Caps & hats", group: "Men", name: "Quilted Leather Cap", img: "p41.jpg", price: 3900, sizes: ["One size"], variantLabel: 'Colour', variants: ["Black", "Navy"] },
-    { id: "red-fade-baseball-cap", cat: "Caps & hats", group: "Women", name: "Red Fade Baseball Cap", img: "p49.jpg", price: 2450, sizes: ["One size"], variantLabel: 'Colour', variants: ["Red", "White"] },
-    { id: "flat-brim-snapback", cat: "Caps & hats", group: "Men", name: "Flat Brim Snapback", img: "p19.jpg", price: 3000, sizes: ["One size"], variantLabel: 'Colour', variants: ["Black", "Beige", "Blue", "Red", "White"], soldOut: true },
-    { id: "brimless-docker-cap", cat: "Caps & hats", group: "Men", name: "Brimless Docker Cap", img: "p21.jpg", price: 2200, sizes: ["One size"] },
-    { id: "sports-brimless-cap", cat: "Caps & hats", group: "Unisex", name: "Sports Brimless Cap", img: "p24.jpg", price: 2350, sizes: ["One size"], variantLabel: 'Colour', variants: ["Beige", "Grey", "Green", "Navy"] },
-    { id: "bucket-hat", cat: "Caps & hats", group: "Unisex", name: "Bucket Hat", img: "p10.jpg", price: 3250, sizes: ["S/M", "L/XL"] },
-    { id: "camo-army-cap", cat: "Caps & hats", group: "Men", name: "Camo Army Cap", img: "p31.jpg", price: 2600, sizes: ["One size"], variantLabel: 'Colour', variants: ["Green", "Khaki"] },
-    { id: "mesh-army-cap", cat: "Caps & hats", group: "Men", name: "Mesh Army Cap", img: "p35.jpg", price: 2450, sizes: ["One size"] },
-    { id: "graffiti-print-cap", cat: "Caps & hats", group: "Unisex", name: "Graffiti Print Cap", img: "p39.jpg", price: 2750, sizes: ["One size"], variantLabel: 'Colour', variants: ["Black", "White"] },
-    { id: "ribbed-beanie", cat: "Caps & hats", group: "Unisex", name: "Ribbed Beanie", img: "p15.jpg", price: 1950, sizes: ["One size"] },
-    { id: "fisherman-beanie-set", cat: "Caps & hats", group: "Unisex", name: "Fisherman Beanie Set", img: "p52.jpg", price: 2100, sizes: ["One size"], variantLabel: 'Colour', variants: ["Brown", "Black"] },
-    { id: "faux-fur-pom-hat", cat: "Caps & hats", group: "Women", name: "Faux Fur Pom Hat", img: "p27.jpg", price: 3500, sizes: ["One size"] },
-    { id: "flat-ivy-caps", cat: "Caps & hats", group: "Men", name: "Flat Ivy Caps", img: "p6.jpg", price: 3100, sizes: ["S/M", "L/XL"], variantLabel: 'Colour', variants: ["Navy", "Black", "Grey"] }
-  ];
+/* ---------- views ---------- */
+function show(v) {
+  if (v === 'admin' && !isAdmin()) v = 'store';
+  if (v === 'orders' && !session) v = 'store';
+  ['store','orders','admin'].forEach(n => $('#' + n + 'View').hidden = n !== v);
+  if (v === 'admin') renderAdmin();
+  if (v === 'orders') renderMyOrders();
+  window.scrollTo(0, 0);
+}
+function refreshHeader() {
+  $('#accountBtn').textContent = session ? `Sign out (${session.name.split(' ')[0]})` : 'Sign in';
+  $('#adminLink').hidden = !isAdmin();
+  $('#ordersLink').hidden = !session || isAdmin();
+  $('#cartCount').textContent = cart.reduce((n, i) => n + i.qty, 0);
+}
 
-  var CATEGORIES = {
-    'New Era': 'Fitted, snapback and adjustable',
-    'Caps & hats': 'Baseball caps, beanies and bucket hats',
-    'Bags': 'Backpacks, handbags and totes'
-  };
+/* ---------- store ---------- */
+function options(label, arr, cur) { return `<option value="">${label}</option>` + arr.map(a => `<option ${a === cur ? 'selected' : ''}>${esc(a)}</option>`).join(''); }
+const uniq = key => [...new Set(products.flatMap(p => [].concat(p[key])))].sort();
 
-  var byId = {};
-  PRODUCTS.forEach(function (p) {
-    p.cat = p.cat || 'New Era';
-    p.price = p.price || PRICE;
-    p.sizes = p.sizes || STYLES[p.style].sizes;
-    p.tag = p.style ? p.style + ' · ' + STYLES[p.style].label : p.cat + ' · ' + p.group;
-    byId[p.id] = p;
-  });
+function setF(k, v) { F[k] = v; renderStore(); if (k === 'q') document.getElementById('shop').scrollIntoView({behavior:'smooth'}); }
+function clearF() { F = {cat:'', gender:'', color:'', size:'', q:''}; $('#q').value = ''; renderStore(); }
 
-  function fmt(n) { return CURRENCY_LABEL + ' ' + n.toLocaleString('en-KE'); }
-  function $(id) { return document.getElementById(id); }
-  function el(tag, cls, text) {
-    var n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
-    return n;
+function renderStore() {
+  $('#fCat').innerHTML = options('All types', ['Bag','Cap'], F.cat);
+  $('#fGender').innerHTML = options('All genders', ['Men','Women','Unisex','Kids'], F.gender);
+  $('#fColor').innerHTML = options('All colours', uniq('colors'), F.color);
+  $('#fSize').innerHTML = options('All sizes', uniq('sizes'), F.size);
+  const side = [['All products','',''],['Bags','cat','Bag'],['Caps','cat','Cap'],['Men','gender','Men'],['Women','gender','Women'],['Kids','gender','Kids'],['Unisex','gender','Unisex']];
+  $('#sideList').innerHTML = side.map(([l,k,v]) => `<li class="${k && F[k] === v ? 'on' : ''}" onclick="${k ? `setF('${k}','${v}')` : 'clearF()'}">${l}</li>`).join('');
+
+  const q = F.q.trim().toLowerCase();
+  const list = products.filter(p =>
+    (!F.cat || p.category === F.cat) && (!F.gender || p.gender === F.gender) &&
+    (!F.color || p.colors.includes(F.color)) && (!F.size || p.sizes.includes(F.size)) &&
+    (!q || (p.name + p.category + p.gender + p.colors.join(' ')).toLowerCase().includes(q)));
+
+  $('#grid').innerHTML = list.length ? list.map(card).join('') : '<p>No products match these filters. Try clearing them.</p>';
+}
+function card(p) {
+  const pic = p.image ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">` : 'No photo yet';
+  const tag = p.stock === 0 ? '<span class="tag out">Sold out</span>' : p.stock < 10 ? `<span class="tag out">Only ${p.stock} left</span>` : '';
+  return `<div class="card">
+    <div class="pic">${tag}${pic}</div>
+    <h4>${esc(p.name)}</h4>
+    <div class="meta">${esc(p.gender)} · ${esc(p.category)}</div>
+    <div class="dots">${p.colors.map(c => `<span class="dot" title="${esc(c)}" style="background:${COLORS[c] || '#ccc'}"></span>`).join('')}</div>
+    <div class="row">
+      <select id="c${p.id}">${p.colors.map(c => `<option>${esc(c)}</option>`).join('')}</select>
+      <select id="s${p.id}">${p.sizes.map(s => `<option>${esc(s)}</option>`).join('')}</select>
+    </div>
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <span class="price">${money(p.price)}</span>
+      <button class="btn small" ${p.stock === 0 ? 'disabled style="opacity:.5"' : ''} onclick="addToCart(${p.id})">Add to cart</button>
+    </div></div>`;
+}
+
+/* ---------- cart ---------- */
+function addToCart(id) {
+  const p = products.find(x => x.id === id);
+  const color = $('#c' + id).value, size = $('#s' + id).value;
+  const line = cart.find(i => i.id === id && i.color === color && i.size === size);
+  const inCart = cart.filter(i => i.id === id).reduce((n, i) => n + i.qty, 0);
+  if (inCart >= p.stock) return toast('No more stock available');
+  line ? line.qty++ : cart.push({id, color, size, qty: 1});
+  saveAll(); refreshHeader(); renderCart(); toast('Added to cart');
+}
+function changeQty(i, d) { cart[i].qty += d; if (cart[i].qty <= 0) cart.splice(i, 1); saveAll(); refreshHeader(); renderCart(); }
+function toggleCart(open) { $('#cart').hidden = !open; if (open) renderCart(); }
+function renderCart() {
+  let total = 0;
+  $('#cartItems').innerHTML = cart.length ? cart.map((i, idx) => {
+    const p = products.find(x => x.id === i.id); if (!p) return '';
+    total += p.price * i.qty;
+    return `<div class="ci"><div><b>${esc(p.name)}</b><br><span class="meta">${esc(i.color)} · ${esc(i.size)}</span></div>
+      <div class="qty"><button onclick="changeQty(${idx},-1)">−</button> ${i.qty} <button onclick="changeQty(${idx},1)">+</button><br>${money(p.price * i.qty)}</div></div>`;
+  }).join('') : '<p>Your cart is empty. Add a bag or cap to get started.</p>';
+  $('#cartTotal').textContent = money(total);
+}
+function checkout() {
+  if (!cart.length) return toast('Your cart is empty');
+  if (!session) { toggleCart(false); return openAuth('in'); }
+  const items = cart.map(i => { const p = products.find(x => x.id === i.id); return {id:i.id, name:p.name, color:i.color, size:i.size, qty:i.qty, price:p.price}; });
+  items.forEach(it => { const p = products.find(x => x.id === it.id); p.stock = Math.max(0, p.stock - it.qty); });
+  orders.push({id: Date.now(), userId: session.id, name: session.name, email: session.email, items, total: items.reduce((n, i) => n + i.price * i.qty, 0), status: 'Pending', date: new Date().toLocaleString()});
+  cart = []; saveAll(); refreshHeader(); toggleCart(false); renderStore(); toast('Order placed. Thank you!'); show('orders');
+}
+
+/* ---------- auth ---------- */
+function accountClick() { if (session) { session = null; save('zv_session', null); refreshHeader(); show('store'); toast('Signed out'); } else openAuth('in'); }
+function openAuth(mode) {
+  authMode = mode; const reg = mode === 'up';
+  $('#authTitle').textContent = reg ? 'Create account' : 'Sign in';
+  $('#authSubmit').textContent = reg ? 'Create account' : 'Sign in';
+  $('#aName').hidden = !reg; $('#aName').required = reg;
+  $('#authSwapText').textContent = reg ? 'Already have an account?' : 'New here?';
+  $('#authSwap').textContent = reg ? 'Sign in' : 'Create an account';
+  $('#authErr').textContent = ''; $('#authModal').hidden = false;
+}
+$('#authSwap').onclick = e => { e.preventDefault(); openAuth(authMode === 'in' ? 'up' : 'in'); };
+$('#authForm').onsubmit = e => {
+  e.preventDefault();
+  const email = $('#aEmail').value.trim().toLowerCase(), pass = $('#aPass').value;
+  if (authMode === 'up') {
+    if (users.some(u => u.email === email)) return $('#authErr').textContent = 'That email is already registered. Sign in instead.';
+    const u = {id: Date.now(), name: $('#aName').value.trim(), email, password: pass, role: 'client'};
+    users.push(u); saveAll(); session = u;
+  } else {
+    const u = users.find(u => u.email === email && u.password === pass);
+    if (!u) return $('#authErr').textContent = 'Wrong email or password.';
+    session = u;
   }
-  function photo(file, alt) {
-    var i = el('img');
-    i.src = 'images/' + file;
-    i.alt = alt;
-    i.loading = 'lazy';
-    return i;
+  save('zv_session', session); $('#authModal').hidden = true; $('#authForm').reset(); refreshHeader();
+  toast('Welcome, ' + session.name.split(' ')[0]); show(isAdmin() ? 'admin' : 'store');
+};
+
+/* ---------- client orders ---------- */
+function orderHTML(o, admin) {
+  return `<div class="orderbox"><b>Order #${o.id}</b> · ${esc(o.date)} · <b>${esc(o.status)}</b>${admin ? ` · ${esc(o.name)} (${esc(o.email)})` : ''}<br>
+    ${o.items.map(i => `${i.qty} × ${esc(i.name)} (${esc(i.color)}, ${esc(i.size)})`).join('<br>')}<br><b>Total ${money(o.total)}</b></div>`;
+}
+function renderMyOrders() {
+  const mine = orders.filter(o => o.userId === session.id).reverse();
+  $('#myOrders').innerHTML = mine.length ? mine.map(o => orderHTML(o)).join('') : '<p>You have no orders yet.</p>';
+}
+
+/* ---------- admin ---------- */
+function adminTab(t) { tab = t; renderAdmin(); }
+function renderAdmin() {
+  const revenue = orders.filter(o => o.status !== 'Cancelled').reduce((n, o) => n + o.total, 0);
+  $('#stats').innerHTML = [['Products', products.length], ['Orders', orders.length], ['Customers', users.filter(u => u.role === 'client').length], ['Revenue', money(revenue)]]
+    .map(([l, v]) => `<div class="stat"><b>${v}</b>${l}</div>`).join('');
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
+  const body = $('#adminBody');
+  if (tab === 'products') {
+    body.innerHTML = `<p><button class="btn" onclick="openProd()">Add product</button></p><div class="scroll"><table class="tbl"><tr><th>Name</th><th>Type</th><th>Gender</th><th>Colours</th><th>Sizes</th><th>Price</th><th>Stock</th><th></th></tr>` +
+      products.map(p => `<tr><td>${esc(p.name)}</td><td>${p.category}</td><td>${p.gender}</td><td>${esc(p.colors.join(', '))}</td><td>${esc(p.sizes.join(', '))}</td><td>${money(p.price)}</td><td>${p.stock}</td>
+      <td><button class="btn small" onclick="openProd(${p.id})">Edit</button> <button class="btn small danger" onclick="delProd(${p.id})">Delete</button></td></tr>`).join('') + '</table></div>';
+  } else if (tab === 'orders') {
+    body.innerHTML = orders.length ? [...orders].reverse().map(o => orderHTML(o, true) +
+      `<p style="margin:-6px 0 14px">Status: <select onchange="setStatus(${o.id},this.value)">${['Pending','Shipped','Delivered','Cancelled'].map(s => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}</select></p>`).join('') : '<p>No orders yet.</p>';
+  } else {
+    body.innerHTML = `<div class="scroll"><table class="tbl"><tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr>` +
+      users.map(u => `<tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${u.role}</td><td>${u.role === 'admin' ? '' : `<button class="btn small danger" onclick="delUser(${u.id})">Remove</button>`}</td></tr>`).join('') + '</table></div>';
   }
+}
+function setStatus(id, s) { orders.find(o => o.id === id).status = s; saveAll(); renderAdmin(); toast('Order marked ' + s); }
+function delUser(id) { if (confirm('Remove this customer?')) { users = users.filter(u => u.id !== id); saveAll(); renderAdmin(); } }
+function delProd(id) { if (confirm('Delete this product?')) { products = products.filter(p => p.id !== id); saveAll(); renderAdmin(); renderStore(); toast('Product deleted'); } }
+function openProd(id) {
+  editingId = id || null; const p = products.find(x => x.id === id);
+  $('#pTitle').textContent = p ? 'Edit product' : 'Add product';
+  $('#pName').value = p?.name || ''; $('#pCat').value = p?.category || 'Bag'; $('#pGender').value = p?.gender || 'Unisex';
+  $('#pColors').value = p?.colors.join(', ') || ''; $('#pSizes').value = p?.sizes.join(', ') || '';
+  $('#pPrice').value = p?.price ?? ''; $('#pStock').value = p?.stock ?? ''; $('#pEmoji').value = p?.image || '';
+  $('#prodModal').hidden = false;
+}
+$('#prodForm').onsubmit = e => {
+  e.preventDefault();
+  const split = s => s.split(',').map(x => x.trim()).filter(Boolean);
+  const data = {name: $('#pName').value.trim(), category: $('#pCat').value, gender: $('#pGender').value, colors: split($('#pColors').value), sizes: split($('#pSizes').value),
+    price: +$('#pPrice').value, stock: +$('#pStock').value, image: $('#pEmoji').value.trim()};
+  if (editingId) Object.assign(products.find(p => p.id === editingId), data);
+  else products.push({id: Date.now(), ...data});
+  saveAll(); $('#prodModal').hidden = true; renderAdmin(); renderStore(); toast('Product saved');
+};
 
-  // ---- Catalogue rendering ----
-  var state = { filter: 'all', query: '', sort: 'featured' };
+/* ---------- start ---------- */
+$('#q').addEventListener('keydown', e => { if (e.key === 'Enter') setF('q', e.target.value); });
+refreshHeader(); renderStore(); renderCart(); initMotion();
 
-  function visibleProducts() {
-    var q = state.query.trim().toLowerCase();
-    var list = PRODUCTS.filter(function (p) {
-      if (state.filter !== 'all' && p.cat !== state.filter) return false;
-      if (!q) return true;
-      return (p.name + ' ' + p.cat + ' ' + p.tag).toLowerCase().indexOf(q) !== -1;
-    });
-    if (state.sort === 'price-asc') list.sort(function (a, b) { return a.price - b.price; });
-    if (state.sort === 'price-desc') list.sort(function (a, b) { return b.price - a.price; });
-    if (state.sort === 'name') list.sort(function (a, b) { return a.name.localeCompare(b.name); });
-    return list;
-  }
-
-  function renderGrid() {
-    var grid = $('productGrid');
-    var list = visibleProducts();
-    grid.textContent = '';
-    list.forEach(function (p) {
-      var card = el('article', 'card');
-      if (p.soldOut || p.badge) card.appendChild(el('span', 'badge', p.soldOut ? 'Sold out' : p.badge));
-      var art = el('button', 'card-art');
-      art.type = 'button';
-      art.setAttribute('aria-label', 'View ' + p.name);
-      art.appendChild(photo(p.img, ''));
-      if (!p.style) art.classList.add('contain');
-      art.addEventListener('click', function () { openProduct(p.id, art); });
-      card.appendChild(art);
-
-      var body = el('div', 'card-body');
-      body.appendChild(el('span', 'card-style', p.tag));
-      body.appendChild(el('h3', 'card-name', p.name));
-      var foot = el('div', 'card-foot');
-      foot.appendChild(el('p', 'price', fmt(p.price)));
-      var btn = el('button', 'btn btn-primary', p.soldOut ? 'View' : 'Choose');
-      btn.type = 'button';
-      btn.setAttribute('aria-label', (p.soldOut ? 'View ' : 'Choose options for ') + p.name);
-      btn.addEventListener('click', function () { openProduct(p.id, btn); });
-      foot.appendChild(btn);
-      body.appendChild(foot);
-      card.appendChild(body);
-      grid.appendChild(card);
-    });
-    $('emptyState').hidden = list.length > 0;
-    $('resultCount').textContent = list.length + (list.length === 1 ? ' item' : ' items');
-  }
-
-  function setFilter(f) {
-    state.filter = f;
-    Array.prototype.forEach.call($('filterChips').children, function (c) {
-      c.setAttribute('aria-pressed', String(c.dataset.filter === f));
-    });
-    renderGrid();
-  }
-
-  function renderFilters() {
-    var chips = $('filterChips');
-    [['all', 'All']].concat(Object.keys(CATEGORIES).map(function (s) { return [s, s]; })).forEach(function (pair) {
-      var c = el('button', 'chip', pair[1]);
-      c.type = 'button';
-      c.dataset.filter = pair[0];
-      c.setAttribute('aria-pressed', String(pair[0] === state.filter));
-      c.addEventListener('click', function () { setFilter(pair[0]); });
-      chips.appendChild(c);
-    });
-
-    var sg = $('styleGrid');
-    Object.keys(CATEGORIES).forEach(function (s) {
-      var card = el('button', 'style-card');
-      card.type = 'button';
-      card.appendChild(el('strong', null, s));
-      card.appendChild(el('span', null, CATEGORIES[s]));
-      card.addEventListener('click', function () {
-        setFilter(s);
-        $('shop').scrollIntoView();
-      });
-      sg.appendChild(card);
-    });
-  }
-
-  // ---- Dialogs ----
-  var openDialog = null;
-  var returnFocus = null;
-
-  function show(dialog, trigger) {
-    if (openDialog) openDialog.hidden = true; else returnFocus = trigger || document.activeElement;
-    openDialog = dialog;
-    dialog.hidden = false;
-    $('overlay').hidden = false;
-    document.body.classList.add('locked');
-    var first = dialog.querySelector('[data-close]');
-    if (first) first.focus();
-  }
-
-  function closeDialog() {
-    if (!openDialog) return;
-    openDialog.hidden = true;
-    openDialog = null;
-    $('overlay').hidden = true;
-    document.body.classList.remove('locked');
-    if (returnFocus && document.contains(returnFocus)) returnFocus.focus();
-    returnFocus = null;
-  }
-
-  // ---- Product detail ----
-  var current = { id: null, size: null, variant: null };
-
-  function pickers(box, options, key) {
-    box.textContent = '';
-    options.forEach(function (o) {
-      var b = el('button', 'size', o);
-      b.type = 'button';
-      b.setAttribute('aria-pressed', String(o === current[key]));
-      b.addEventListener('click', function () {
-        current[key] = o;
-        $('pmError').hidden = true;
-        Array.prototype.forEach.call(box.children, function (n) {
-          n.setAttribute('aria-pressed', String(n === b));
-        });
-      });
-      box.appendChild(b);
-    });
-  }
-
-  function openProduct(id, trigger) {
-    var p = byId[id];
-    var sizes = p.sizes;
-    current = { id: id, size: sizes.length === 1 ? sizes[0] : null, variant: p.variants ? null : '' };
-
-    var art = $('pmArt');
-    art.textContent = '';
-    art.classList.toggle('contain', !p.style);
-    var main = photo(p.img, p.name);
-    main.loading = 'eager';
-    art.appendChild(main);
-    if (p.more) {
-      var thumbs = el('div', 'thumbs');
-      [p.img].concat(p.more).forEach(function (file, i) {
-        var t = el('button', 'thumb-btn');
-        t.type = 'button';
-        t.setAttribute('aria-label', 'Show photo ' + (i + 1));
-        t.setAttribute('aria-pressed', String(i === 0));
-        t.appendChild(photo(file, ''));
-        t.addEventListener('click', function () {
-          main.src = 'images/' + file;
-          Array.prototype.forEach.call(thumbs.children, function (n) {
-            n.setAttribute('aria-pressed', String(n === t));
-          });
-        });
-        thumbs.appendChild(t);
-      });
-      art.appendChild(thumbs);
-    }
-
-    $('pmStyle').textContent = p.tag;
-    $('pmName').textContent = p.name;
-    $('pmPrice').textContent = fmt(p.price);
-    $('pmDesc').textContent = p.desc || '';
-    $('pmDesc').hidden = !p.desc;
-    $('pmError').hidden = true;
-    $('pmAdd').disabled = !!p.soldOut;
-    $('pmAdd').textContent = p.soldOut ? 'Sold out' : 'Add to cart';
-
-    $('pmVariantField').hidden = !p.variants;
-    if (p.variants) {
-      $('pmVariantLegend').textContent = p.variantLabel;
-      pickers($('pmVariants'), p.variants, 'variant');
-    }
-    pickers($('pmSizes'), sizes, 'size');
-    show($('productModal'), trigger);
-  }
-
-  // ---- Cart ----
-  var cart = loadCart();
-
-  function validLine(i) {
-    var p = i && byId[i.id];
-    if (!p || p.soldOut || p.sizes.indexOf(i.size) === -1 || !(i.qty > 0)) return false;
-    return p.variants ? p.variants.indexOf(i.variant) !== -1 : !i.variant;
-  }
-
-  function loadCart() {
-    try {
-      var raw = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
-      if (!Array.isArray(raw)) return [];
-      return raw.filter(validLine).map(function (i) {
-        return { id: i.id, size: i.size, variant: i.variant || '', qty: Math.min(99, Math.floor(i.qty)) };
-      });
-    } catch (e) { return []; }
-  }
-
-  function saveCart() {
-    try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) { /* storage unavailable */ }
-  }
-
-  function totals() {
-    var subtotal = cart.reduce(function (s, i) { return s + byId[i.id].price * i.qty; }, 0);
-    var shipping = subtotal === 0 || subtotal >= FREE_SHIPPING_OVER ? 0 : SHIPPING_FEE;
-    return { subtotal: subtotal, shipping: shipping, total: subtotal + shipping };
-  }
-
-  function addToCart(id, size, variant) {
-    var line = cart.filter(function (i) { return i.id === id && i.size === size && i.variant === variant; })[0];
-    if (line) line.qty = Math.min(99, line.qty + 1); else cart.push({ id: id, size: size, variant: variant, qty: 1 });
-    saveCart();
-    renderCart();
-  }
-
-  function renderCart() {
-    var box = $('cartItems');
-    box.textContent = '';
-    var count = cart.reduce(function (s, i) { return s + i.qty; }, 0);
-    $('cartCount').textContent = count;
-    $('cartFoot').hidden = cart.length === 0;
-
-    if (!cart.length) {
-      box.appendChild(el('p', 'cart-empty', 'Your cart is empty.'));
-      return;
-    }
-
-    cart.forEach(function (item, idx) {
-      var p = byId[item.id];
-      var row = el('div', 'cart-item');
-      var thumb = el('div', 'thumb');
-      thumb.appendChild(photo(p.img, ''));
-      row.appendChild(thumb);
-
-      var mid = el('div');
-      mid.appendChild(el('h4', null, p.name));
-      mid.appendChild(el('small', null, [item.variant, item.size].filter(Boolean).join(' · ')));
-      var qty = el('div', 'qty');
-      var minus = el('button', null, '−');
-      minus.type = 'button';
-      minus.setAttribute('aria-label', 'Decrease quantity of ' + p.name);
-      var plus = el('button', null, '+');
-      plus.type = 'button';
-      plus.setAttribute('aria-label', 'Increase quantity of ' + p.name);
-      minus.addEventListener('click', function () { changeQty(idx, -1); });
-      plus.addEventListener('click', function () { changeQty(idx, 1); });
-      qty.appendChild(minus);
-      qty.appendChild(el('span', null, String(item.qty)));
-      qty.appendChild(plus);
-      mid.appendChild(qty);
-      row.appendChild(mid);
-
-      var right = el('div', 'line');
-      right.appendChild(el('div', null, fmt(p.price * item.qty)));
-      var rm = el('button', 'remove', 'Remove');
-      rm.type = 'button';
-      rm.setAttribute('aria-label', 'Remove ' + p.name);
-      rm.addEventListener('click', function () { changeQty(idx, -item.qty); });
-      right.appendChild(rm);
-      row.appendChild(right);
-      box.appendChild(row);
-    });
-
-    var t = totals();
-    $('cartSubtotal').textContent = fmt(t.subtotal);
-    $('cartShipping').textContent = t.shipping ? fmt(t.shipping) : 'Free';
-    $('cartTotal').textContent = fmt(t.total);
-  }
-
-  function changeQty(idx, delta) {
-    var item = cart[idx];
-    if (!item) return;
-    item.qty = Math.min(99, item.qty + delta);
-    if (item.qty <= 0) cart.splice(idx, 1);
-    saveCart();
-    renderCart();
-  }
-
-  // ---- Toast ----
-  var toastTimer;
-  function toast(msg) {
-    var t = $('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
-  }
-
-  // ---- Checkout ----
-  var checkoutMarkup;
-
-  function openCheckout() {
-    if (!cart.length) return;
-    $('coBody').innerHTML = checkoutMarkup;
-    $('coTotal').textContent = fmt(totals().total);
-    $('checkoutForm').addEventListener('submit', submitOrder);
-    show($('checkoutModal'));
-  }
-
-  function submitOrder(e) {
-    e.preventDefault();
-    var form = e.target;
-    var err = $('coError');
-    var data = {};
-    ['name', 'email', 'phone', 'address'].forEach(function (k) { data[k] = form.elements[k].value.trim(); });
-    var problem = '';
-    if (!data.name || !data.phone || !data.address) problem = 'Fill in every field so we can deliver your order.';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) problem = 'Enter a valid email address.';
-    if (problem) {
-      err.textContent = problem;
-      err.hidden = false;
-      return;
-    }
-
-    // No backend yet: the order is only confirmed on screen. Send `order` to
-    // your server or payment provider here when one is connected.
-    var order = { ref: 'CB-' + Date.now().toString(36).toUpperCase(), customer: data, items: cart.slice(), totals: totals() };
-
-    var body = $('coBody');
-    body.textContent = '';
-    body.appendChild(el('p', 'eyebrow', 'Order placed'));
-    body.appendChild(el('h3', null, 'Thank you, ' + data.name.split(' ')[0] + '.'));
-    var p = el('p');
-    p.appendChild(document.createTextNode('Your order reference is '));
-    p.appendChild(el('span', 'order-ref', order.ref));
-    p.appendChild(document.createTextNode('. Total: ' + fmt(order.totals.total) + '.'));
-    body.appendChild(p);
-    var done = el('button', 'btn btn-primary btn-block', 'Keep shopping');
-    done.type = 'button';
-    done.addEventListener('click', closeDialog);
-    body.appendChild(done);
-
-    cart = [];
-    saveCart();
-    renderCart();
-  }
-
-  // ---- Wire up ----
-  function init() {
-    checkoutMarkup = $('coBody').innerHTML;
-    $('year').textContent = new Date().getFullYear();
-    document.querySelector('[data-free-ship]').textContent = fmt(FREE_SHIPPING_OVER);
-
-    renderFilters();
-    renderGrid();
-    renderCart();
-
-    $('search').addEventListener('input', function (e) { state.query = e.target.value; renderGrid(); });
-    $('sort').addEventListener('change', function (e) { state.sort = e.target.value; renderGrid(); });
-
-    $('pmAdd').addEventListener('click', function () {
-      var p = byId[current.id];
-      var missing = [];
-      if (current.variant === null) missing.push(p.variantLabel.toLowerCase());
-      if (!current.size) missing.push('size');
-      if (missing.length) {
-        $('pmError').textContent = 'Choose a ' + missing.join(' and a ') + ' first.';
-        $('pmError').hidden = false;
-        return;
-      }
-      addToCart(current.id, current.size, current.variant);
-      closeDialog();
-      toast(p.name + ' added to cart');
-    });
-
-    $('cartOpen').addEventListener('click', function () { show($('cartDrawer'), $('cartOpen')); });
-    $('checkoutOpen').addEventListener('click', openCheckout);
-    $('overlay').addEventListener('click', closeDialog);
-    document.addEventListener('click', function (e) {
-      if (e.target.closest('[data-close]')) closeDialog();
-    });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeDialog();
-    });
-  }
-
-  init();
-})();
+/* ---------- moving pictures: hero slider + product strip ---------- */
+function initMotion() {
+  const withImg = products.filter(p => p.image);
+  if (!withImg.length) return;
+  const wanted = [54, 48, 12, 3, 21, 11, 29, 9].map(i => withImg.find(p => p.image === `images/p${i}.jpg`)).filter(Boolean);
+  const picks = wanted.length >= 3 ? wanted : withImg.slice(0, 6);
+  const slider = $('#slider');
+  slider.innerHTML = picks.map(p => `<div class="slide"><img src="${esc(p.image)}" alt="${esc(p.name)}">
+      <button onclick="setF('q','${esc(p.name).replace(/'/g, '')}')"><span>${esc(p.name)}</span><span>${money(p.price)}</span></button></div>`).join('') +
+    `<div class="dots-nav">${picks.map((_, i) => `<i data-i="${i}"></i>`).join('')}</div>`;
+  const slides = [...slider.querySelectorAll('.slide')], dots = [...slider.querySelectorAll('.dots-nav i')];
+  let n = 0, timer;
+  const go = i => { n = (i + slides.length) % slides.length; slides.forEach((s, k) => s.classList.toggle('on', k === n)); dots.forEach((d, k) => d.classList.toggle('on', k === n)); };
+  const play = () => { clearInterval(timer); if (!matchMedia('(prefers-reduced-motion: reduce)').matches) timer = setInterval(() => go(n + 1), 3800); };
+  dots.forEach(d => d.onclick = () => { go(+d.dataset.i); play(); });
+  slider.onmouseenter = () => clearInterval(timer); slider.onmouseleave = play;
+  go(0); play();
+  const item = p => `<div class="mi" onclick="setF('q','${esc(p.name).replace(/'/g, '')}')"><img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">${esc(p.name)}</div>`;
+  const strip = withImg.map(item).join('');
+  $('#track').innerHTML = strip + strip;
+}
