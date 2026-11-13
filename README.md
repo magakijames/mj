@@ -21,12 +21,22 @@ for your server first.
 
 ## 2. Backend (Java)
 
-You need JDK 17 or newer. Maven downloads everything else.
+You need JDK 17 or newer. Nothing else: Maven is downloaded for you the first time.
 
-1. Open the `backend` folder in your IDE as a Maven project.
+**On Windows, with the batch files** (in the `backend` folder):
+
+- `build.bat` builds the backend. Run it again whenever you change the Java code.
+- `run.bat` starts it. It asks for your SQL Server login name and password, and builds first if needed.
+- `run.bat h2` starts it on a temporary in-memory database, without SQL Server.
+
+Double-click them, or run them from a Command Prompt. Stop the server with Ctrl+C.
+
+**From an IDE:**
+
+1. Open the `backend` folder as a Maven project.
 2. Give it your database login. Either set the environment variables `DB_USERNAME` and `DB_PASSWORD`
    in the run configuration, or edit `backend/src/main/resources/application.properties`.
-3. Run `SnapAndPackApplication`. From a terminal: `mvn spring-boot:run` inside `backend`.
+3. Run `SnapAndPackApplication`.
 
 The API starts on <http://localhost:8080>. On its first start it creates the admin account and loads
 the 57 starting products.
@@ -35,8 +45,8 @@ the 57 starting products.
 Change these before real use: set `ADMIN_EMAIL` and `ADMIN_PASSWORD` before the first start, and set
 `JWT_SECRET` to a long random value.
 
-**No SQL Server yet?** `mvn spring-boot:run -Dspring-boot.run.profiles=h2` runs the API on a temporary
-in-memory database. Everything is erased when it stops.
+**No SQL Server yet?** `run.bat h2` (or `mvnw spring-boot:run -Dspring-boot.run.profiles=h2`) runs the API on a
+temporary in-memory database. Everything is erased when it stops.
 
 ## 3. Frontend
 
