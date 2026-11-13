@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your cart – Snap &amp; Pack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/store.css">
+</head>
+<body>
+  <div id="siteHeader"></div>
+
+  <main class="wrap">
+    <h1 class="page-title">Your cart</h1>
+    <div class="cart-layout">
+      <section class="panel" id="cartLines"><p class="empty">Loading your cart…</p></section>
+
+      <aside class="panel" id="checkout" hidden>
+        <h2>Checkout</h2>
+        <p class="total-row"><span>Total</span><b id="cartTotal"></b></p>
+        <p id="signInNote" hidden><a id="signInLink" href="login.html">Sign in</a> to place your order.</p>
+        <form id="checkoutForm" class="form" hidden>
+          <label>Phone number <input id="phone" type="tel" autocomplete="tel" maxlength="30" required></label>
+          <label>Delivery address <textarea id="address" rows="3" autocomplete="street-address" maxlength="500" required></textarea></label>
+          <p class="err" id="formError" role="alert"></p>
+          <button class="btn">Place order</button>
+        </form>
+      </aside>
+    </div>
+  </main>
+
+  <div id="siteFooter"></div>
+  <script type="module" src="../assets/js/pages/cart.js"></script>
+</body>
+</html>

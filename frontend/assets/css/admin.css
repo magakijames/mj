@@ -1,0 +1,36 @@
+/* Admin area: dashboard, tables and staff tools. */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px;color:var(--muted);font-size:13px}
+.stat b{font:700 28px var(--head);display:block;color:var(--ink)}
+.tabs{display:flex;gap:8px;margin:22px 0 14px}
+.tabs button{padding:9px 18px;border:1px solid var(--line);background:#fff;border-radius:4px;cursor:pointer;font:600 14px var(--body)}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tbl{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);font-size:14px}
+.tbl th,.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{background:#f3f4f2;font-weight:700}
+.scroll{overflow-x:auto}
+
+/* ---- added for the multi-page layout ---- */
+.admin-header{position:sticky;top:0;z-index:20}
+.admin-nav{display:flex;gap:6px;flex:1;flex-wrap:wrap}
+.admin-nav a{padding:9px 16px;border-radius:4px;font:600 14px var(--body);color:var(--text);text-decoration:none}
+.admin-nav a:hover{background:#eef0ef}
+.admin-nav a.on{background:var(--ink);color:#fff}
+.who{font-size:13.5px;font-weight:600;margin-right:6px;white-space:nowrap}
+.stats{margin:20px 0}
+.shortcuts{display:flex;gap:10px;flex-wrap:wrap}
+/* Tables: every cell lines up on the middle of the row, and the action buttons stay on one line. */
+.tbl th,.tbl td{vertical-align:middle}
+.tbl th{white-space:nowrap}
+.tbl .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl .actions-cell{width:1%;white-space:nowrap;text-align:right}
+.tbl .btn.small{padding:7px 14px;min-width:72px}
+.tbl select{padding:7px 9px;border:1px solid var(--line);border-radius:4px;background:#fff}
+.tbl tbody tr:hover{background:#fafbfa}
+.cell-product{display:flex;align-items:center;gap:12px;min-width:220px}
+.thumb{width:44px;height:44px;flex:none;object-fit:contain;border:1px solid var(--line);border-radius:4px;background:#fff;display:block}
+.orderbox select{padding:7px 9px;border:1px solid var(--line);border-radius:4px;background:#fff;margin-left:6px}
+.orderbox label{font-size:13px;font-weight:600}
+@media(max-width:860px){.admin-header .actions{flex-wrap:wrap}.who{white-space:normal}.admin-nav{flex-basis:100%;order:3}}
+/* Keeps hidden screen-reader labels inside the scrolling table, so wide tables never widen the page. */
+.scroll{position:relative}

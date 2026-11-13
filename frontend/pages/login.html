@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in – Snap &amp; Pack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/store.css">
+</head>
+<body>
+  <div id="siteHeader"></div>
+
+  <main class="wrap narrow">
+    <div class="panel">
+      <h1>Sign in</h1>
+      <form id="loginForm" class="form">
+        <label>Email <input id="email" type="email" autocomplete="email" required></label>
+        <label>Password <input id="password" type="password" autocomplete="current-password" required></label>
+        <p class="err" id="formError" role="alert"></p>
+        <button class="btn">Sign in</button>
+      </form>
+      <p class="swap">New here? <a id="registerLink" href="register.html">Create an account</a></p>
+    </div>
+  </main>
+
+  <div id="siteFooter"></div>
+  <script type="module" src="../assets/js/pages/login.js"></script>
+</body>
+</html>

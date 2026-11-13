@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Users – Snap &amp; Pack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+  <div id="adminHeader"></div>
+
+  <main class="wrap">
+    <div class="page-head">
+      <div><h1 class="page-title" id="pageTitle">Users</h1><p class="meta" id="userCount"></p></div>
+      <button class="btn" id="addUser" hidden>Add staff account</button>
+    </div>
+    <p id="intro"></p>
+    <div class="scroll" id="userTable"><p class="empty">Loading accounts…</p></div>
+  </main>
+
+  <div id="userModal" class="modal" hidden>
+    <div class="box" role="dialog" aria-modal="true" aria-labelledby="userFormTitle">
+      <h2 id="userFormTitle">Add staff account</h2>
+      <form id="userForm" class="form">
+        <label>Full name <input id="uName" maxlength="100" required></label>
+        <label>Email <input id="uEmail" type="email" required></label>
+        <label>Password <input id="uPassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" required>
+          <small>At least 8 characters. Give it to the staff member privately.</small></label>
+        <label>Role <select id="uRole"></select><small id="roleNote"></small></label>
+        <p class="err" id="formError" role="alert"></p>
+        <div class="btn-row end">
+          <button type="button" class="btn ghost" data-close>Cancel</button>
+          <button class="btn">Create account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script type="module" src="../assets/js/admin/users.js"></script>
+</body>
+</html>

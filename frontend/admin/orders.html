@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orders – Snap &amp; Pack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+  <div id="adminHeader"></div>
+
+  <main class="wrap">
+    <div class="page-head">
+      <div><h1 class="page-title">Orders</h1><p class="meta" id="orderCount"></p></div>
+    </div>
+    <p class="note" id="readOnlyNote" hidden>You can view orders. Only the admin and order managers can change their status.</p>
+    <div id="orderList"><p class="empty">Loading orders…</p></div>
+  </main>
+  <script type="module" src="../assets/js/admin/orders.js"></script>
+</body>
+</html>
