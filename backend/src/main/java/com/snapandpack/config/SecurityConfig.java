@@ -27,8 +27,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
- * Who may call what. Browsing products, registering and signing in are open to everyone;
- * every other request needs a token. Role rules sit on the controller methods (@PreAuthorize).
+ * Who may call what. The website files, browsing products, registering and signing in are open
+ * to everyone; every other /api request needs a token. Role rules sit on the controller methods (@PreAuthorize).
  */
 @Configuration
 @EnableMethodSecurity
@@ -44,7 +44,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/api/**").authenticated()
+                        // Everything else is the website itself (pages, styles, scripts, images).
+                        .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtUserConverter)));
         return http.build();
     }

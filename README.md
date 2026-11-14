@@ -38,8 +38,9 @@ Double-click them, or run them from a Command Prompt. Stop the server with Ctrl+
    in the run configuration, or edit `backend/src/main/resources/application.properties`.
 3. Run `SnapAndPackApplication`.
 
-The API starts on <http://localhost:8080>. On its first start it creates the admin account and loads
-the 57 starting products.
+When the log says "Snap & Pack is running", open <http://localhost:8080> in your browser. The backend
+serves the website as well as the API, so that one address is the whole store. On its first start it
+creates the admin account and loads the 57 starting products.
 
 **First admin sign-in:** `admin@snapandpack.local` / `ChangeMe123!`
 Change these before real use: set `ADMIN_EMAIL` and `ADMIN_PASSWORD` before the first start, and set
@@ -50,11 +51,15 @@ temporary in-memory database. Everything is erased when it stops.
 
 ## 3. Frontend
 
-1. Open the `frontend` folder in VS Code.
-2. Right-click `index.html` and choose "Open with Live Server".
+Nothing to start: with the backend running, <http://localhost:8080> is the website, and the admin area
+is at <http://localhost:8080/admin/index.html>.
 
-The backend must be running, because the pages load products and accounts from it. The API address is
-set in `frontend/assets/js/core/config.js`.
+When the backend is started from the `backend` folder (as `run.bat` does), it reads the `frontend` folder
+straight from disk, so after editing a page or style you only need to refresh the browser. Changes to
+Java code need `build.bat` and a restart.
+
+VS Code Live Server still works if you prefer it: open the `frontend` folder and start Live Server on
+`index.html`. The pages then call the backend on port 8080, so it must be running too.
 
 ## Who can do what
 
