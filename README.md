@@ -27,6 +27,8 @@ You need JDK 17 or newer. Nothing else: Maven is downloaded for you the first ti
 
 - `build.bat` builds the backend. Run it again whenever you change the Java code.
 - `run.bat` starts it. It asks for your SQL Server login name and password, and builds first if needed.
+  If port 8080 is taken it uses the next free one and tells you the address. If the server cannot start,
+  it says why; the full log is in `backend/logs/server.log`.
 - `run.bat h2` starts it on a temporary in-memory database, without SQL Server.
 
 Double-click them, or run them from a Command Prompt. Stop the server with Ctrl+C.

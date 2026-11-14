@@ -1,10 +1,10 @@
 // Settings shared by every page.
 
 // Where the Java backend runs.
-// Opened through the backend (http://localhost:8080): the API is on the same server.
-// Opened through VS Code Live Server (another port on this computer): the API is on port 8080.
-const LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
-export const API_BASE = LOCAL && location.port !== '8080' ? 'http://localhost:8080/api' : '/api';
+// Opened through the backend (for example http://localhost:8080): the API is on the same server.
+// Opened through VS Code Live Server (ports 5500 and up): the API is the backend on port 8080.
+const LIVE_SERVER = /^55\d\d$/.test(location.port);
+export const API_BASE = LIVE_SERVER ? 'http://localhost:8080/api' : '/api';
 
 // The folder that holds index.html, worked out from this file's own address,
 // so links and images work from any page however the site is served.
