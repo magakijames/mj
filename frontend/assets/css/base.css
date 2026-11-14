@@ -75,3 +75,8 @@ a.btn{display:inline-block;text-align:center}
 .orderbox ul{margin:8px 0;padding-left:18px}
 .orderbox p{margin:4px 0}
 @media(max-width:860px){.footer{grid-template-columns:1fr 1fr}.form-row{grid-template-columns:1fr}}
+
+/* ---- site settings, password reset ---- */
+.nowrap{white-space:nowrap}
+.panel .note{margin:0 0 14px}
+.swap{margin:14px 0 0}

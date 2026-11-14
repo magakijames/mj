@@ -16,6 +16,7 @@ import java.util.List;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
+/** Something the shop sells. Maps to the "products" table, with its colours and sizes in two side tables. */
 @Entity
 @Table(name = "products")
 public class Product {
@@ -59,6 +60,8 @@ public class Product {
     @Column(name = "size", nullable = false)
     @Fetch(FetchMode.SUBSELECT)
     private List<String> sizes = new ArrayList<>();
+
+    // ---- Getters and setters: plain read and write access to the fields above. ----
 
     public Long getId() { return id; }
 

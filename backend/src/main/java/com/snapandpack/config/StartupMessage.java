@@ -16,6 +16,7 @@ public class StartupMessage {
     @Value("${server.port}")
     private int port;
 
+    /** Called by Spring when the server is ready to take requests: writes the addresses to open. */
     @EventListener(ApplicationReadyEvent.class)
     public void printAddress() {
         log.info("");

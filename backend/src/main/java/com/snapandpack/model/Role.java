@@ -5,7 +5,7 @@ package com.snapandpack.model;
  * The admin controls the whole system; the other staff roles each cover one area.
  */
 public enum Role {
-    /** Everything, including creating staff and changing roles. */
+    /** Everything, including site settings, staff accounts and roles. */
     ADMIN,
     /** Adds, edits and removes products and keeps stock up to date. */
     PRODUCT_MANAGER,
@@ -16,6 +16,7 @@ public enum Role {
     /** A shopper. */
     CUSTOMER;
 
+    /** True for every role that works for the shop, false for customers. */
     public boolean isStaff() {
         return this != CUSTOMER;
     }

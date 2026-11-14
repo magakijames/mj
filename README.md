@@ -10,14 +10,19 @@ database/   SQL scripts for Microsoft SQL Server.
 
 ## 1. Database (Microsoft SQL Server)
 
-In SQL Server Management Studio:
+In SQL Server Management Studio, connected as an administrator, run these in order. Each is run once.
 
-1. Run `database/01_create_database.sql`. It creates an empty database called `SnapAndPack`.
-2. Select the `SnapAndPack` database, then run `database/02_schema.sql`. It creates the tables.
+| Script | What it does |
+| --- | --- |
+| `database/01_create_database.sql` | Creates an empty database called `SnapAndPack`. |
+| `database/02_schema.sql` | Creates the main tables. Select the `SnapAndPack` database first. |
+| `database/03_security_and_settings.sql` | Adds sign-in protection, password reset links, editable site text, the activity record and extra data rules. Select the `SnapAndPack` database first. |
+| `database/04_app_login_permissions.sql` | Gives the backend's login (`clearance_app`) only the rights it needs, table by table. Edit the login name inside the script if yours is different. |
+
+**Upgrading a database that is already running:** run only `03` and then `04`. Your products, accounts
+and orders are kept.
 
 The backend connects with SQL Server authentication (a login name and password), over TCP on port 1433.
-If you normally use Windows authentication, enable "SQL Server and Windows Authentication mode" and TCP/IP
-for your server first.
 
 ## 2. Backend (Java)
 
@@ -67,25 +72,57 @@ VS Code Live Server still works if you prefer it: open the `frontend` folder and
 
 | Role | What they can do |
 | --- | --- |
-| Admin | Everything: products, orders, and creating staff, changing roles, switching accounts on or off |
+| Admin | Everything: products, orders, site settings, the activity record, creating staff, changing roles, switching accounts on or off, making password reset links |
 | Product manager | Add, edit and delete products; update stock |
 | Order manager | See all orders and change their status |
 | Support | See orders and customers, without changing anything |
 | Customer | Shop, place orders, see their own orders |
 
-Anyone can register as a customer. Staff accounts are created by the admin on the Users page.
-The backend checks the role on every request; the front end only hides what a role cannot use.
+Anyone can register as a customer. Staff accounts are created by the admin on the Users page, which
+lists staff and customers on separate tabs. The backend checks the role on every request; the front end
+only hides what a role cannot use.
+
+## Site settings
+
+On the admin **Site settings** page the admin can change the shop name, the line under it, the
+announcement bar, the home page headline, the four promise boxes (shipping, returns, support, checkout),
+the footer line and the contact details. The text is stored in the database.
+
+## Forgotten passwords
+
+1. The user clicks "Forgot your password?" on the sign-in page and enters their email.
+2. A reset link is created. It works once, for 30 minutes, and a newer link cancels older ones.
+3. **Until email is connected**, the link is written to the server log (`backend/logs/server.log`), and
+   the admin can also make a link for any account with "Reset password" on the Users page and pass it on.
+4. Opening the link lets the user choose a new password. Their old sign-ins stop working.
+
+When email is added later, it replaces `LogNotifier` (see `backend/.../notification/`); nothing else changes.
+
+## Security
+
+- Passwords are stored only as BCrypt hashes, and must be 8 to 72 characters with a letter and a number.
+- Five wrong passwords in a row lock an account for 15 minutes.
+- Sign-in tokens stop working when a password is reset or an account is switched off.
+- Reset links are stored only as hashes, so reading the database does not reveal a usable link.
+- The database refuses bad data itself (CHECK, UNIQUE and FOREIGN KEY rules), and the backend's login can
+  neither delete accounts or orders nor change the activity record (`04_app_login_permissions.sql`).
+- Every change by staff and every sign-in lock or password reset is written to the activity record.
+- Pages are sent with a Content-Security-Policy and other protective headers.
+- All database access uses parameters, never text pasted into SQL.
+
+Before going live, also set `JWT_SECRET` to a long random value, change the first admin password, and
+serve the site over HTTPS.
 
 ## Folder guide
 
 ```
 frontend/
   index.html                 Store home page
-  pages/                     login, register, cart (with checkout), orders
-  admin/                     index (dashboard), products, orders, users
+  pages/                     login, register, forgot-password, reset-password, cart (with checkout), orders
+  admin/                     index (dashboard), products, orders, users, settings, activity
   assets/
     css/                     base.css (shared), store.css, admin.css
-    js/core/                 config, api, auth, cart-store, ui  (shared by all pages)
+    js/core/                 config, api, auth, cart-store, settings, ui  (shared by all pages)
     js/pages/                one script per store page
     js/admin/                one script per admin page, plus layout.js
     images/                  product photos
@@ -96,7 +133,9 @@ backend/src/main/java/com/snapandpack/
   repository/                database access
   model/                     the tables as Java classes
   dto/                       the shapes of requests and responses
-  security/                  sign-in tokens
+  security/                  sign-in tokens, password rules
+  notification/              messages to users (log only for now; email, SMS and WhatsApp later)
+  web/                       helper for building links to the site
   config/                    security rules, first-run data
   exception/                 error messages sent to the front end
 backend/src/main/resources/
@@ -106,6 +145,8 @@ backend/src/main/resources/
 database/
   01_create_database.sql
   02_schema.sql
+  03_security_and_settings.sql
+  04_app_login_permissions.sql
 ```
 
 ## API summary
@@ -115,6 +156,8 @@ database/
 | `POST /api/auth/register` | anyone | Create a customer account |
 | `POST /api/auth/login` | anyone | Sign in |
 | `GET /api/auth/me` | signed in | Current user and role |
+| `POST /api/auth/forgot-password` | anyone | Create a password reset link |
+| `POST /api/auth/reset-password` | anyone with a link | Set a new password |
 | `GET /api/products`, `GET /api/products/{id}` | anyone | Browse products |
 | `POST /api/products`, `PUT/DELETE /api/products/{id}` | Admin, Product manager | Manage products |
 | `POST /api/orders` | signed in | Place an order |
@@ -124,10 +167,15 @@ database/
 | `GET /api/users` | Admin (all), Support (customers) | List accounts |
 | `POST /api/users` | Admin | Create an account with any role |
 | `PATCH /api/users/{id}/role`, `PATCH /api/users/{id}/active` | Admin | Change role, switch on or off |
+| `POST /api/users/{id}/password-reset` | Admin | Make a reset link for an account |
+| `GET /api/settings` | anyone | Shop name and site text |
+| `PUT /api/settings` | Admin | Change site text |
+| `GET /api/audit` | Admin | Activity record |
 | `GET /api/dashboard/stats` | any staff | Dashboard totals |
 
 ## Not built yet
 
 - Payment. Orders are saved, but no money is collected.
-- Password reset and changing your own password.
+- Email, SMS and WhatsApp messages. Password reset links are handed over by the admin until email is connected.
+- Changing your own password while signed in (use "Forgot your password?" for now).
 - Uploading product photos from the admin page (photos are added to `frontend/assets/images` by hand).

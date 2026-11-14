@@ -9,6 +9,7 @@ import com.snapandpack.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** The totals shown on the admin dashboard. */
 @Service
 public class DashboardService {
 
@@ -16,12 +17,14 @@ public class DashboardService {
     private final OrderRepository orders;
     private final UserRepository users;
 
+    /** Receives the database access this class needs. */
     public DashboardService(ProductRepository products, OrderRepository orders, UserRepository users) {
         this.products = products;
         this.orders = orders;
         this.users = users;
     }
 
+    /** Counts products, orders, customers and staff, and adds up revenue without cancelled orders. */
     @Transactional(readOnly = true)
     public StatsResponse stats() {
         long customers = users.countByRole(Role.CUSTOMER);

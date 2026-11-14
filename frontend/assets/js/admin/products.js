@@ -6,6 +6,7 @@ import { openAdminPage, showError } from './layout.js';
 let products = [];
 let editingId = null;
 
+// Fetches the products from the backend and draws the table.
 async function load() {
   try {
     products = await api('/products');
@@ -15,6 +16,7 @@ async function load() {
   }
 }
 
+// Draws the product table, with an Edit and a Delete button on every row.
 function render() {
   $('#productCount').textContent = products.length + (products.length === 1 ? ' product' : ' products');
   $('#productTable').innerHTML = `<table class="tbl">
@@ -34,6 +36,7 @@ function render() {
     </tr>`).join('')}</tbody></table>`;
 }
 
+// Opens the product form: empty for a new product, or filled in for the product with this id.
 function openForm(id) {
   editingId = id ?? null;
   const p = products.find(x => x.id === id);
@@ -50,10 +53,14 @@ function openForm(id) {
   $('#productModal').hidden = false;
   $('#pName').focus();
 }
+
+// Closes the product form without saving.
 const closeForm = () => { $('#productModal').hidden = true; };
 
+// Turns "Black, Navy , Beige" into ['Black', 'Navy', 'Beige'].
 const split = text => text.split(',').map(x => x.trim()).filter(Boolean);
 
+// Saves the form: adds a new product or updates the one being edited.
 $('#productForm').addEventListener('submit', async e => {
   e.preventDefault();
   const body = {
@@ -71,23 +78,27 @@ $('#productForm').addEventListener('submit', async e => {
   }
 });
 
-document.addEventListener('click', async e => {
+// Deletes the product with this id after asking for confirmation.
+async function deleteProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
+  try {
+    await api(`/products/${p.id}`, { method: 'DELETE' });
+    toast('Product deleted');
+    load();
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+// One click handler for the page's buttons: Add product, Cancel, Edit and Delete.
+document.addEventListener('click', e => {
   if (e.target.closest('#addProduct')) return openForm();
   if (e.target.closest('[data-close]')) return closeForm();
   const edit = e.target.closest('[data-edit]');
   if (edit) return openForm(+edit.dataset.edit);
   const del = e.target.closest('[data-delete]');
-  if (del) {
-    const p = products.find(x => x.id === +del.dataset.delete);
-    if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
-    try {
-      await api(`/products/${p.id}`, { method: 'DELETE' });
-      toast('Product deleted');
-      load();
-    } catch (error) {
-      toast(error.message);
-    }
-  }
+  if (del) deleteProduct(+del.dataset.delete);
 });
 
 if (await openAdminPage('products')) load();

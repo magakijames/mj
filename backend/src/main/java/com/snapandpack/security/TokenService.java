@@ -18,11 +18,13 @@ public class TokenService {
     private final JwtEncoder encoder;
     private final Duration validFor;
 
+    /** Receives the token signer and how many hours a token stays valid (app.jwt.hours-valid). */
     public TokenService(JwtEncoder encoder, @Value("${app.jwt.hours-valid}") long hoursValid) {
         this.encoder = encoder;
         this.validFor = Duration.ofHours(hoursValid);
     }
 
+    /** Creates a signed token that names the user by id and expires after the configured time. */
     public String issue(User user) {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()

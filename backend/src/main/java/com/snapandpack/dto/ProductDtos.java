@@ -11,11 +11,13 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.List;
 
+/** Request and response bodies for products. */
 public final class ProductDtos {
 
     private ProductDtos() {
     }
 
+    /** What the admin product form sends when adding or editing a product. */
     public record ProductRequest(
             @NotBlank(message = "Enter a product name") @Size(max = 150) String name,
             @NotBlank @Pattern(regexp = "Bag|Cap", message = "Category must be Bag or Cap") String category,
@@ -27,9 +29,11 @@ public final class ProductDtos {
             @Size(max = 500) String image) {
     }
 
+    /** A product as the front end sees it. */
     public record ProductResponse(Long id, String name, String category, String gender, List<String> colors,
                                   List<String> sizes, BigDecimal price, int stock, String image) {
 
+        /** Copies a product from the database into a response. */
         public static ProductResponse from(Product p) {
             return new ProductResponse(p.getId(), p.getName(), p.getCategory(), p.getGender(),
                     List.copyOf(p.getColors()), List.copyOf(p.getSizes()), p.getPrice(), p.getStock(), p.getImage());

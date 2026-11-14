@@ -18,7 +18,9 @@
       <div><h1 class="page-title" id="pageTitle">Users</h1><p class="meta" id="userCount"></p></div>
       <button class="btn" id="addUser" hidden>Add staff account</button>
     </div>
-    <p id="intro"></p>
+    <p class="note" id="readOnlyNote" hidden>You can view customer accounts. Only the admin can change them.</p>
+    <div class="tabs" id="tabs"></div>
+    <p class="meta" id="tabNote"></p>
     <div class="scroll" id="userTable"><p class="empty">Loading accounts…</p></div>
   </main>
 
@@ -29,7 +31,7 @@
         <label>Full name <input id="uName" maxlength="100" required></label>
         <label>Email <input id="uEmail" type="email" required></label>
         <label>Password <input id="uPassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" required>
-          <small>At least 8 characters. Give it to the staff member privately.</small></label>
+          <small>At least 8 characters, with a letter and a number. Give it to the staff member privately.</small></label>
         <label>Role <select id="uRole"></select><small id="roleNote"></small></label>
         <p class="err" id="formError" role="alert"></p>
         <div class="btn-row end">
@@ -37,6 +39,21 @@
           <button class="btn">Create account</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <div id="resetModal" class="modal" hidden>
+    <div class="box" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+      <h2 id="resetTitle">Password reset link</h2>
+      <div class="form">
+        <p>Send this link to <b id="resetFor"></b> privately. Opening it lets them choose a new password.</p>
+        <label>Link <input id="resetLink" readonly></label>
+        <p class="meta">It works once and stops working at <span id="resetExpiry"></span>. Making a new link cancels this one.</p>
+        <div class="btn-row end">
+          <button type="button" class="btn ghost" data-close>Close</button>
+          <button type="button" class="btn" id="copyLink">Copy link</button>
+        </div>
+      </div>
     </div>
   </div>
   <script type="module" src="../assets/js/admin/users.js"></script>

@@ -19,22 +19,26 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Placing orders, listing them and moving them through their statuses. */
 @Service
 public class OrderService {
 
     private final OrderRepository orders;
     private final ProductRepository products;
     private final UserRepository users;
+    private final AuditService audit;
 
-    public OrderService(OrderRepository orders, ProductRepository products, UserRepository users) {
+    /** Receives the database access this class needs and the activity record. */
+    public OrderService(OrderRepository orders, ProductRepository products, UserRepository users, AuditService audit) {
         this.orders = orders;
         this.products = products;
         this.users = users;
+        this.audit = audit;
     }
 
     /**
      * Saves an order and takes the stock in one transaction: if any line cannot be filled,
-     * nothing is saved and no stock is taken.
+     * nothing is saved and no stock is taken. Prices come from the database, never from the browser.
      */
     @Transactional
     public OrderResponse place(Long userId, CreateOrderRequest request) {
@@ -74,17 +78,19 @@ public class OrderService {
         return OrderResponse.from(orders.save(order));
     }
 
+    /** One customer's own orders, newest first. */
     @Transactional(readOnly = true)
     public List<OrderResponse> listForCustomer(Long userId) {
         return orders.findByUserIdOrderByCreatedAtDesc(userId).stream().map(OrderResponse::from).toList();
     }
 
+    /** Every order, newest first, for staff. */
     @Transactional(readOnly = true)
     public List<OrderResponse> listAll() {
         return orders.findAllByOrderByCreatedAtDesc().stream().map(OrderResponse::from).toList();
     }
 
-    /** Cancelling puts the stock back. A cancelled order stays cancelled. */
+    /** Moves an order to a new status and records it. Cancelling puts the stock back; a cancelled order stays cancelled. */
     @Transactional
     public OrderResponse changeStatus(Long orderId, OrderStatus status) {
         CustomerOrder order = orders.findById(orderId).orElseThrow(() -> ApiException.notFound("Order not found"));
@@ -101,6 +107,7 @@ public class OrderService {
                 }
             }
         }
+        audit.record("ORDER_STATUS_CHANGED", "Order #" + order.getId() + ": " + order.getStatus() + " to " + status);
         order.setStatus(status);
         return OrderResponse.from(order);
     }

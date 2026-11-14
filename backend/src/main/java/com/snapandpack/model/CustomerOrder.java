@@ -53,10 +53,13 @@ public class CustomerOrder {
     @OrderBy("id")
     private List<OrderItem> items = new ArrayList<>();
 
+    /** Adds a line to this order and links the line back to it. */
     public void addItem(OrderItem item) {
         item.setOrder(this);
         items.add(item);
     }
+
+    // ---- Getters and setters: plain read and write access to the fields above. ----
 
     public Long getId() { return id; }
 

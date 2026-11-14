@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+/** Addresses for products (/api/products). Anyone can look; only the admin and product managers can change. */
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -25,20 +26,24 @@ public class ProductController {
 
     private final ProductService productService;
 
+    /** Receives the service this controller passes requests to. */
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
+    /** GET /api/products: every product. Open to everyone. */
     @GetMapping
     public List<ProductResponse> list() {
         return productService.list();
     }
 
+    /** GET /api/products/{id}: one product. Open to everyone. */
     @GetMapping("/{id}")
     public ProductResponse get(@PathVariable Long id) {
         return productService.get(id);
     }
 
+    /** POST /api/products: adds a product. Admin and product managers only. */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize(CAN_EDIT)
@@ -46,12 +51,14 @@ public class ProductController {
         return productService.create(request);
     }
 
+    /** PUT /api/products/{id}: replaces a product's details. Admin and product managers only. */
     @PutMapping("/{id}")
     @PreAuthorize(CAN_EDIT)
     public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
         return productService.update(id, request);
     }
 
+    /** DELETE /api/products/{id}: removes a product. Admin and product managers only. */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize(CAN_EDIT)

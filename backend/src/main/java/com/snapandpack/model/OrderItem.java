@@ -46,6 +46,8 @@ public class OrderItem {
     @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
 
+    // ---- Getters and setters: plain read and write access to the fields above. ----
+
     public Long getId() { return id; }
 
     public CustomerOrder getOrder() { return order; }

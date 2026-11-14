@@ -63,7 +63,9 @@ set "FOUND="
 call :check "Login failed" "SQL Server did not accept that login name or password."
 call :check "The TCP/IP connection to the host" "SQL Server is not reachable on localhost port 1433. Start SQL Server and enable TCP/IP for it in SQL Server Configuration Manager."
 call :check "Cannot open database" "The SnapAndPack database is missing, or this login may not open it. Run database\01_create_database.sql."
-call :check "Invalid object name" "The tables are missing. Run database\02_schema.sql with the SnapAndPack database selected."
+call :check "Invalid object name" "A table is missing. Run database\02_schema.sql and then database\03_security_and_settings.sql with the SnapAndPack database selected."
+call :check "Invalid column name" "The database is missing the newest columns. Run database\03_security_and_settings.sql as an administrator."
+call :check "permission was denied" "The database login lacks a permission it needs. Run database\04_app_login_permissions.sql again as an administrator."
 call :check "was already in use" "The port was taken by another program just as the server started. Run run.bat again."
 if not defined FOUND echo   - The cause is not one this script knows. Send the file backend\%LOG% to get it fixed.
 echo.

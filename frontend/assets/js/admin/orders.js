@@ -6,6 +6,7 @@ import { openAdminPage, showError } from './layout.js';
 
 let canEdit = false;
 
+// Fetches every order from the backend and draws the list.
 async function load() {
   try {
     const orders = await api('/orders');
@@ -16,6 +17,8 @@ async function load() {
   }
 }
 
+// The HTML for one order. Roles that may change the status get a drop-down; others see a label.
+// A cancelled order is final, so it never gets the drop-down.
 function row(o) {
   const locked = !canEdit || o.status === 'CANCELLED';
   const control = locked
@@ -30,6 +33,7 @@ function row(o) {
   </article>`;
 }
 
+// Saves a new status when a drop-down is changed. Cancelling asks first, because it cannot be undone.
 $('#orderList').addEventListener('change', async e => {
   const select = e.target.closest('[data-order]');
   if (!select) return;

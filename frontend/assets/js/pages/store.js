@@ -2,9 +2,10 @@
 import { api } from '../core/api.js';
 import { COLORS } from '../core/config.js';
 import { addToCart, quantityInCart } from '../core/cart-store.js';
-import { $, esc, money, imageUrl, toast, refreshCartCount, mountStoreChrome } from '../core/ui.js';
+import { $, esc, escLines, money, imageUrl, toast, refreshCartCount, mountStoreChrome } from '../core/ui.js';
 
-mountStoreChrome({ search: true });
+const settings = await mountStoreChrome({ search: true });
+showSiteText(settings);
 
 let products = [];
 let filters = { category: '', gender: '', color: '', size: '', q: '' };
@@ -14,25 +15,44 @@ const SIDE_LINKS = [
   ['Men', 'gender', 'Men'], ['Women', 'gender', 'Women'], ['Kids', 'gender', 'Kids'], ['Unisex', 'gender', 'Unisex'],
 ];
 
+// Fills in the headline and the four promise boxes from the site settings.
+function showSiteText(s) {
+  $('#heroTitle').innerHTML = escLines(s.hero_title);
+  $('#heroText').textContent = s.hero_text;
+  $('#perks').innerHTML = [1, 2, 3, 4]
+    .filter(n => s[`perk${n}_title`] || s[`perk${n}_text`])
+    .map(n => `<li><b>${esc(s[`perk${n}_title`])}</b>${esc(s[`perk${n}_text`])}</li>`).join('');
+  $('#newsletterTitle').textContent = `Join the ${s.shop_name} community`;
+}
+
+// Every different value of one product field (colours or sizes), sorted, for the filter lists.
 const unique = key => [...new Set(products.flatMap(p => p[key]))].sort();
+
+// The <option> tags for a filter drop-down, with the current choice selected.
 const options = (label, values, current) =>
   `<option value="">${label}</option>` + values.map(v => `<option ${v === current ? 'selected' : ''}>${esc(v)}</option>`).join('');
 
+// Changes one filter and redraws the grid.
 function setFilter(key, value) {
   filters[key] = value;
   render();
 }
+
+// Clears every filter and the search box.
 function clearFilters() {
   filters = { category: '', gender: '', color: '', size: '', q: '' };
   $('#q').value = '';
   render();
 }
+
+// Searches for some text and scrolls down to the results.
 function search(text) {
   $('#q').value = text;
   setFilter('q', text);
   $('#shop').scrollIntoView({ behavior: 'smooth' });
 }
 
+// Draws the filter controls, the side menu and the products that match the filters.
 function render() {
   $('#fCategory').innerHTML = options('All types', ['Bag', 'Cap'], filters.category);
   $('#fGender').innerHTML = options('All genders', ['Men', 'Women', 'Unisex', 'Kids'], filters.gender);
@@ -53,6 +73,7 @@ function render() {
   $('#grid').innerHTML = list.length ? list.map(card).join('') : '<p class="empty">No products match these filters. Try clearing them.</p>';
 }
 
+// The HTML for one product card: photo, name, colour and size choices, price and "Add to cart".
 function card(p) {
   const picture = p.image ? `<img src="${esc(imageUrl(p.image))}" alt="${esc(p.name)}" loading="lazy">` : 'No photo yet';
   const tag = p.stock === 0 ? '<span class="tag out">Sold out</span>' : p.stock < 10 ? `<span class="tag out">Only ${p.stock} left</span>` : '';
@@ -72,6 +93,7 @@ function card(p) {
   </article>`;
 }
 
+// Puts one of a product in the cart, in the colour and size chosen on its card, unless stock has run out.
 function add(id) {
   const product = products.find(p => p.id === id);
   if (quantityInCart(id) >= product.stock) return toast('No more stock available');
@@ -80,7 +102,7 @@ function add(id) {
   toast('Added to cart');
 }
 
-// Hero slider and the moving strip of product photos.
+// Starts the hero slider (eight products that change every few seconds) and the moving strip of photos.
 function startMotion() {
   const withImage = products.filter(p => p.image);
   if (!withImage.length) return;
@@ -93,11 +115,14 @@ function startMotion() {
   const slides = [...slider.querySelectorAll('.slide')];
   const dots = [...slider.querySelectorAll('.dots-nav i')];
   let current = 0, timer;
+
+  // Shows slide number i, wrapping round at either end.
   const go = i => {
     current = (i + slides.length) % slides.length;
     slides.forEach((s, k) => s.classList.toggle('on', k === current));
     dots.forEach((d, k) => d.classList.toggle('on', k === current));
   };
+  // Starts the automatic change of slides, unless the visitor has asked their device for less motion.
   const play = () => {
     clearInterval(timer);
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) timer = setInterval(() => go(current + 1), 3800);
@@ -114,7 +139,7 @@ function startMotion() {
   $('#track').innerHTML = strip + strip;
 }
 
-// One click handler for everything on the page.
+// One click handler for everything on the page: add to cart, slider and strip, side menu, clear filters.
 document.addEventListener('click', e => {
   const addBtn = e.target.closest('[data-add]');
   if (addBtn) return add(+addBtn.dataset.add);
@@ -129,6 +154,7 @@ $('#filters').addEventListener('change', e => setFilter(e.target.dataset.filter,
 $('#searchForm').addEventListener('submit', e => { e.preventDefault(); search($('#q').value); });
 $('#newsletterForm').addEventListener('submit', e => { e.preventDefault(); e.target.reset(); toast('Subscribed. Thank you!'); });
 
+// Load the products and draw the page.
 try {
   products = await api('/products');
   render();

@@ -3,12 +3,13 @@ import { api } from '../core/api.js';
 import { url } from '../core/config.js';
 import { getUser } from '../core/auth.js';
 import { getCart, setQuantity, clearCart } from '../core/cart-store.js';
-import { $, esc, money, imageUrl, toast, refreshCartCount, mountStoreChrome } from '../core/ui.js';
+import { $, esc, money, imageUrl, refreshCartCount, mountStoreChrome } from '../core/ui.js';
 
-mountStoreChrome();
+await mountStoreChrome();
 
 let products = [];
 
+// Draws the cart lines, the total and the checkout panel.
 function render() {
   const cart = getCart();
   const lines = cart.map((line, index) => ({ line, index, product: products.find(p => p.id === line.productId) }));
@@ -36,6 +37,7 @@ function render() {
   refreshCartCount();
 }
 
+// The − and + buttons (and "Remove") change a line's quantity.
 $('#cartLines').addEventListener('click', e => {
   const button = e.target.closest('[data-step]');
   if (!button) return;
@@ -46,6 +48,7 @@ $('#cartLines').addEventListener('click', e => {
 
 $('#signInLink').href = url('pages/login.html') + '?next=' + encodeURIComponent(location.href);
 
+// Places the order: sends the cart lines, phone and address; the backend works out the prices.
 $('#checkoutForm').addEventListener('submit', async e => {
   e.preventDefault();
   const error = $('#formError');
@@ -60,6 +63,7 @@ $('#checkoutForm').addEventListener('submit', async e => {
   }
 });
 
+// Load the products (for names, photos and prices) and draw the page.
 try {
   products = await api('/products');
   render();

@@ -2,6 +2,9 @@ package com.snapandpack.security;
 
 import com.snapandpack.model.User;
 import com.snapandpack.repository.UserRepository;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -20,10 +23,15 @@ public class JwtUserConverter implements Converter<Jwt, AbstractAuthenticationTo
 
     private final UserRepository users;
 
+    /** Receives database access for accounts. */
     public JwtUserConverter(UserRepository users) {
         this.users = users;
     }
 
+    /**
+     * Looks up the account named in the token and refuses it when the account is gone, switched off,
+     * or has had its password reset since the token was issued. Otherwise signs the user in with their current role.
+     */
     @Override
     public AbstractAuthenticationToken convert(Jwt jwt) {
         User user;
@@ -35,7 +43,20 @@ public class JwtUserConverter implements Converter<Jwt, AbstractAuthenticationTo
         if (user == null || !user.isActive()) {
             throw new InvalidBearerTokenException("This account is no longer active");
         }
+        if (issuedBeforePasswordChange(jwt, user)) {
+            throw new InvalidBearerTokenException("The password was changed; sign in again");
+        }
         var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
         return new JwtAuthenticationToken(jwt, authorities, String.valueOf(user.getId()));
+    }
+
+    /** True when the token is older than the account's last password reset, so old sessions end at a reset. */
+    private static boolean issuedBeforePasswordChange(Jwt jwt, User user) {
+        if (user.getPasswordChangedAt() == null || jwt.getIssuedAt() == null) {
+            return false;
+        }
+        // Tokens carry whole seconds, so compare against the change time rounded down to the second.
+        Instant changed = user.getPasswordChangedAt().toInstant(ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS);
+        return jwt.getIssuedAt().isBefore(changed);
     }
 }

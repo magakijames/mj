@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Site settings – Snap &amp; Pack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+  <div id="adminHeader"></div>
+
+  <main class="wrap">
+    <div class="page-head">
+      <div><h1 class="page-title">Site settings</h1><p class="meta">The shop name and the text shown on the store. Changes appear the next time a page is opened.</p></div>
+    </div>
+    <form id="settingsForm" hidden>
+      <div id="settingsFields"></div>
+      <p class="err" id="formError" role="alert"></p>
+      <div class="save-bar"><button class="btn">Save changes</button></div>
+    </form>
+  </main>
+  <script type="module" src="../assets/js/admin/settings.js"></script>
+</body>
+</html>
