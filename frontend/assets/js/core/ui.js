@@ -1,8 +1,9 @@
 // Small helpers used on every page, plus the shared header and footer.
-import { url, ROLES } from './config.js';
+import { url, ROLES, API_ORIGIN } from './config.js';
 import { getUser, isStaff, signOut } from './auth.js';
 import { cartCount } from './cart-store.js';
 import { loadSettings } from './settings.js';
+import { notificationLink, watchNotifications } from './notifications.js';
 
 // Finds the first element matching a CSS selector.
 export const $ = selector => document.querySelector(selector);
@@ -19,8 +20,15 @@ export const money = amount => 'KSh ' + Math.round(Number(amount)).toLocaleStrin
 // Formats a date and time from the server for reading.
 export const dateTime = iso => new Date(iso).toLocaleString('en-KE', { dateStyle: 'medium', timeStyle: 'short' });
 
-// Product images are stored as a path inside the site (assets/images/...) or as a full web address.
-export const imageUrl = image => (!image ? '' : /^https?:\/\//.test(image) ? image : url(image));
+// Works out the address of a product photo. A product stores one of:
+//   a full web address (https://...), a photo uploaded by staff (uploads/...), which the backend serves,
+//   or a photo that ships with the site (assets/images/...).
+export function imageUrl(image) {
+  if (!image) return '';
+  if (/^https?:\/\//.test(image)) return image;
+  if (image.startsWith('uploads/')) return API_ORIGIN + '/' + image;
+  return url(image);
+}
 
 // The on-screen label for a role code.
 export const roleLabel = role => ROLES[role] || role;
@@ -53,7 +61,7 @@ export function applyShopName(settings) {
 }
 
 // Draws the top bar, header and footer of the store pages using the site settings, and returns
-// those settings. Pass { search: true } on the home page to include the search box.
+// those settings. The top bar and header stay pinned to the top of the screen while the page scrolls. Pass { search: true } on the home page to include the search box.
 export async function mountStoreChrome({ search = false } = {}) {
   const settings = await loadSettings();
   const user = getUser();
@@ -63,6 +71,7 @@ export async function mountStoreChrome({ search = false } = {}) {
   if (!user) links.push(`<a class="link" href="${url('pages/login.html')}">Sign in</a>`);
   if (user && isStaff(user)) links.push(`<a class="link" href="${url('admin/index.html')}">Admin panel</a>`);
   if (user) links.push(`<a class="link" href="${url('pages/orders.html')}">My orders</a>`);
+  if (user) links.push(notificationLink());
   if (user) links.push(`<button class="link" id="signOutBtn">Sign out (${esc(user.name.split(' ')[0])})</button>`);
   links.push(`<a class="link" href="${url('pages/cart.html')}">Cart (<span id="cartCount">${cartCount()}</span>)</a>`);
 
@@ -85,5 +94,6 @@ export async function mountStoreChrome({ search = false } = {}) {
     </footer>`;
 
   $('#signOutBtn')?.addEventListener('click', signOut);
+  watchNotifications(count => toast(count === 1 ? 'You have a new notification' : `You have ${count} new notifications`));
   return settings;
 }

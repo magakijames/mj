@@ -8,6 +8,7 @@ import com.snapandpack.model.CustomerOrder;
 import com.snapandpack.model.OrderItem;
 import com.snapandpack.model.OrderStatus;
 import com.snapandpack.model.Product;
+import com.snapandpack.model.Role;
 import com.snapandpack.model.User;
 import com.snapandpack.repository.OrderRepository;
 import com.snapandpack.repository.ProductRepository;
@@ -27,13 +28,19 @@ public class OrderService {
     private final ProductRepository products;
     private final UserRepository users;
     private final AuditService audit;
+    private final NotificationService notifications;
 
-    /** Receives the database access this class needs and the activity record. */
-    public OrderService(OrderRepository orders, ProductRepository products, UserRepository users, AuditService audit) {
+    /** Stock at or below this number after a sale triggers a "low stock" notice to staff. */
+    private static final int LOW_STOCK = 5;
+
+    /** Receives the database access this class needs, the activity record and notifications. */
+    public OrderService(OrderRepository orders, ProductRepository products, UserRepository users, AuditService audit,
+                        NotificationService notifications) {
         this.orders = orders;
         this.products = products;
         this.users = users;
         this.audit = audit;
+        this.notifications = notifications;
     }
 
     /**
@@ -72,10 +79,22 @@ public class OrderService {
             order.addItem(item);
 
             total = total.add(product.getPrice().multiply(BigDecimal.valueOf(line.quantity())));
+
+            int left = product.getStock() - line.quantity();
+            if (left <= LOW_STOCK) {
+                notifications.notifyStaff(Role.STOCK_STAFF, "Low stock: " + product.getName(),
+                        left == 0 ? "Sold out." : left + " left.", "admin/products.html");
+            }
         }
         order.setTotal(total);
+        CustomerOrder saved = orders.save(order);
 
-        return OrderResponse.from(orders.save(order));
+        notifications.notify(user, "Order #" + saved.getId() + " received",
+                "Thank you. Your order total is " + PaymentService.money(total) + ". Pay with M-Pesa from My orders to confirm it.",
+                "pages/orders.html");
+        notifications.notifyStaff(Role.ORDER_STAFF, "New order #" + saved.getId(),
+                user.getName() + " ordered " + PaymentService.money(total) + " of goods.", "admin/orders.html");
+        return OrderResponse.from(saved);
     }
 
     /** One customer's own orders, newest first. */
@@ -90,7 +109,7 @@ public class OrderService {
         return orders.findAllByOrderByCreatedAtDesc().stream().map(OrderResponse::from).toList();
     }
 
-    /** Moves an order to a new status and records it. Cancelling puts the stock back; a cancelled order stays cancelled. */
+    /** Moves an order to a new status, records it and tells the customer. Cancelling puts the stock back; a cancelled order stays cancelled. */
     @Transactional
     public OrderResponse changeStatus(Long orderId, OrderStatus status) {
         CustomerOrder order = orders.findById(orderId).orElseThrow(() -> ApiException.notFound("Order not found"));
@@ -109,6 +128,8 @@ public class OrderService {
         }
         audit.record("ORDER_STATUS_CHANGED", "Order #" + order.getId() + ": " + order.getStatus() + " to " + status);
         order.setStatus(status);
+        notifications.notify(order.getUser(), "Order #" + order.getId() + " " + status.name().toLowerCase(),
+                "Your order #" + order.getId() + " is now " + status.name().toLowerCase() + ".", "pages/orders.html");
         return OrderResponse.from(order);
     }
 }

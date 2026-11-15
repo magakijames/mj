@@ -45,6 +45,14 @@ public class CustomerOrder {
     @Column(name = "status", nullable = false)
     private OrderStatus status = OrderStatus.PENDING;
 
+    /** True once a payment for this order has been confirmed by the payment provider. */
+    @Column(name = "payment_status", nullable = false)
+    private String paymentStatus = "UNPAID";
+
+    /** The M-Pesa receipt number of the confirmed payment, or null. */
+    @Column(name = "payment_reference")
+    private String paymentReference;
+
     /** Stored in UTC. */
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -77,6 +85,14 @@ public class CustomerOrder {
 
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
+
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public boolean isPaid() { return "PAID".equals(paymentStatus); }
+
+    public String getPaymentReference() { return paymentReference; }
+    public void setPaymentReference(String paymentReference) { this.paymentReference = paymentReference; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

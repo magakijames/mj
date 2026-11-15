@@ -1,12 +1,13 @@
 // Shared by every admin page: checks who is signed in and draws the admin header and menu.
 import { api } from '../core/api.js';
 import { url, ADMIN_PAGES } from '../core/config.js';
-import { getToken, setAuth, isStaff, requireSignIn, signOut } from '../core/auth.js';
+import { setAuth, isStaff, requireSignIn, signOut } from '../core/auth.js';
+import { notificationLink, watchNotifications } from '../core/notifications.js';
 import { loadSettings } from '../core/settings.js';
-import { $, esc, roleLabel, applyShopName } from '../core/ui.js';
+import { $, esc, roleLabel, applyShopName, toast } from '../core/ui.js';
 
-// The menu label for an admin page. Support staff see "Customers" where the admin sees "Users".
-export const pageLabel = (page, user) => (page.key === 'users' && user.role !== 'ADMIN' ? 'Customers' : page.label);
+// The menu label for an admin page. Support staff see "Customers" where the super admin sees "Users".
+export const pageLabel = (page, user) => (page.key === 'users' && user.role !== 'SUPER_ADMIN' ? 'Customers' : page.label);
 
 // Opens an admin page. Returns the signed-in staff member, or null after sending the visitor elsewhere.
 // The role is re-read from the server, so a change made by the admin shows up straight away.
@@ -21,7 +22,7 @@ export async function openAdminPage(pageKey) {
     document.body.innerHTML = `<p class="empty">${esc(error.message)}</p>`;
     return null;
   }
-  setAuth({ token: getToken(), user });
+  setAuth(user);
 
   const page = ADMIN_PAGES.find(p => p.key === pageKey);
   if (!isStaff(user)) { location.href = url('index.html'); return null; }
@@ -38,11 +39,13 @@ export async function openAdminPage(pageKey) {
       </nav>
       <div class="actions">
         <span class="who">${esc(user.name)} <span class="badge">${roleLabel(user.role)}</span></span>
+        ${notificationLink()}
         <a class="link" href="${url('index.html')}">View store</a>
         <button class="link" id="signOutBtn">Sign out</button>
       </div>
     </header>`;
   $('#signOutBtn').addEventListener('click', signOut);
+  watchNotifications(count => toast(count === 1 ? 'You have a new notification' : `You have ${count} new notifications`));
   return user;
 }
 

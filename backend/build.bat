@@ -1,12 +1,12 @@
 @echo off
 rem Builds the Snap & Pack backend into target\snap-and-pack-backend-0.1.0.jar
-rem Needs JDK 17 or newer. Maven is downloaded automatically the first time.
+rem Needs JDK 21 or newer. Maven is downloaded automatically the first time.
 setlocal
 cd /d "%~dp0"
 
 where java >nul 2>nul
 if errorlevel 1 if not defined JAVA_HOME (
-    echo Java was not found. Install JDK 17 or newer, then open a new Command Prompt and try again.
+    echo Java was not found. Install JDK 21 or newer, then open a new Command Prompt and try again.
     echo Download: https://adoptium.net
     pause
     exit /b 1

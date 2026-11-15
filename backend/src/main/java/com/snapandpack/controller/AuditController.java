@@ -1,6 +1,7 @@
 package com.snapandpack.controller;
 
 import com.snapandpack.dto.AuditEntryResponse;
+import com.snapandpack.security.Access;
 import com.snapandpack.service.AuditService;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,9 +21,9 @@ public class AuditController {
         this.auditService = auditService;
     }
 
-    /** GET /api/audit: the 200 most recent activity lines. Admin only. */
+    /** GET /api/audit: the 200 most recent activity lines. Super admin only. */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize(Access.SUPER_ADMIN)
     public List<AuditEntryResponse> recent() {
         return auditService.recent();
     }

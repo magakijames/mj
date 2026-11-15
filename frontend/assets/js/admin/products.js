@@ -78,6 +78,24 @@ $('#productForm').addEventListener('submit', async e => {
   }
 });
 
+// Uploads the photo chosen in the form. The server checks it really is a JPEG or PNG, saves it under
+// a name of its own choosing and answers with the path, which is put in the photo box.
+$('#pFile').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const form = new FormData();
+  form.append('file', file);
+  $('#formError').textContent = '';
+  try {
+    const { path } = await api('/uploads/product-image', { method: 'POST', form });
+    $('#pImage').value = path;
+    toast('Photo uploaded');
+  } catch (error) {
+    $('#formError').textContent = error.message;
+  }
+  e.target.value = '';
+});
+
 // Deletes the product with this id after asking for confirmation.
 async function deleteProduct(id) {
   const p = products.find(x => x.id === id);

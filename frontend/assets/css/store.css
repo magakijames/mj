@@ -77,3 +77,10 @@
 .qty{display:inline-flex;align-items:center;gap:8px}
 .total-row{display:flex;justify-content:space-between;font-size:18px;margin:0 0 16px}
 @media(max-width:860px){.layout{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.hero-text{padding:28px}.hero h1{font-size:34px}.slider{min-height:280px}.perks{grid-template-columns:1fr 1fr}.cart-layout{grid-template-columns:1fr}.ci{grid-template-columns:52px 1fr auto}.ci img{width:52px;height:52px}.ci-total{grid-column:2/-1;text-align:left}}
+
+/* ---- paying for an order ---- */
+.pay{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+.pay input{padding:8px 10px;border:1px solid var(--line);border-radius:4px;width:170px}
+.pay-note{flex-basis:100%}
+.pay-note:empty{display:none}
+.orderbox.highlight{border-color:var(--brass);box-shadow:0 0 0 2px rgba(169,130,74,.25)}

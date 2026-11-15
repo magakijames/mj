@@ -46,3 +46,6 @@
 .settings-grid small{font-weight:400;color:var(--muted)}
 .save-bar{position:sticky;bottom:0;background:var(--bg);padding:14px 0;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
 @media(max-width:860px){.settings-grid{grid-template-columns:1fr}}
+
+/* ---- payment line on admin orders ---- */
+.pay{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 0}

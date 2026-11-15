@@ -3,6 +3,7 @@ package com.snapandpack.security;
 import com.snapandpack.model.User;
 import com.snapandpack.repository.UserRepository;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -30,7 +31,7 @@ public class JwtUserConverter implements Converter<Jwt, AbstractAuthenticationTo
 
     /**
      * Looks up the account named in the token and refuses it when the account is gone, switched off,
-     * or has had its password reset since the token was issued. Otherwise signs the user in with their current role.
+     * or has signed out or had its password reset since the token was issued. Otherwise signs the user in with their current role.
      */
     @Override
     public AbstractAuthenticationToken convert(Jwt jwt) {
@@ -43,20 +44,20 @@ public class JwtUserConverter implements Converter<Jwt, AbstractAuthenticationTo
         if (user == null || !user.isActive()) {
             throw new InvalidBearerTokenException("This account is no longer active");
         }
-        if (issuedBeforePasswordChange(jwt, user)) {
-            throw new InvalidBearerTokenException("The password was changed; sign in again");
+        if (issuedBefore(jwt, user.getPasswordChangedAt()) || issuedBefore(jwt, user.getSessionsValidAfter())) {
+            throw new InvalidBearerTokenException("This sign-in has ended; sign in again");
         }
         var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
         return new JwtAuthenticationToken(jwt, authorities, String.valueOf(user.getId()));
     }
 
-    /** True when the token is older than the account's last password reset, so old sessions end at a reset. */
-    private static boolean issuedBeforePasswordChange(Jwt jwt, User user) {
-        if (user.getPasswordChangedAt() == null || jwt.getIssuedAt() == null) {
+    /** True when the token was issued before the given moment (a password reset or a sign-out), so it must be refused. */
+    private static boolean issuedBefore(Jwt jwt, LocalDateTime moment) {
+        if (moment == null || jwt.getIssuedAt() == null) {
             return false;
         }
-        // Tokens carry whole seconds, so compare against the change time rounded down to the second.
-        Instant changed = user.getPasswordChangedAt().toInstant(ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS);
-        return jwt.getIssuedAt().isBefore(changed);
+        // Tokens carry whole seconds, so compare against the moment rounded down to the second.
+        Instant cutOff = moment.toInstant(ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS);
+        return jwt.getIssuedAt().isBefore(cutOff);
     }
 }

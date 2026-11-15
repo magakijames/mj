@@ -24,6 +24,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     /** Every account, newest first. */
     List<User> findAllByOrderByCreatedAtDesc();
 
+    /** Active accounts holding any of these roles, for sending staff notifications. */
+    List<User> findByRoleInAndActiveTrue(List<Role> roles);
+
     /** Every account with this role, newest first. */
     List<User> findByRoleOrderByCreatedAtDesc(Role role);
 }

@@ -3,6 +3,7 @@ package com.snapandpack.controller;
 import com.snapandpack.dto.OrderDtos.CreateOrderRequest;
 import com.snapandpack.dto.OrderDtos.OrderResponse;
 import com.snapandpack.dto.OrderDtos.UpdateStatusRequest;
+import com.snapandpack.security.Access;
 import com.snapandpack.security.CurrentUser;
 import com.snapandpack.service.OrderService;
 import jakarta.validation.Valid;
@@ -44,16 +45,16 @@ public class OrderController {
         return orderService.listForCustomer(CurrentUser.id(authentication));
     }
 
-    /** GET /api/orders: every order. Admin, order managers and support only. */
+    /** GET /api/orders: every order. Super admin, admin, order managers and support only. */
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'ORDER_MANAGER', 'SUPPORT')")
+    @PreAuthorize(Access.ORDER_VIEWERS)
     public List<OrderResponse> all() {
         return orderService.listAll();
     }
 
-    /** PATCH /api/orders/{id}/status: moves an order to a new status. Admin and order managers only. */
+    /** PATCH /api/orders/{id}/status: moves an order to a new status. Super admin, admin and order managers only. */
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ORDER_MANAGER')")
+    @PreAuthorize(Access.ORDER_EDITORS)
     public OrderResponse changeStatus(@PathVariable Long id, @Valid @RequestBody UpdateStatusRequest request) {
         return orderService.changeStatus(id, request.status());
     }

@@ -24,9 +24,6 @@ public final class AuthDtos {
             @NotBlank(message = "Enter your password") String password) {
     }
 
-    /** Sent back after a successful sign-in or registration: the token and who signed in. */
-    public record AuthResponse(String token, UserDtos.UserResponse user) {
-    }
 
     /** What the "forgot password" form sends. */
     public record ForgotPasswordRequest(

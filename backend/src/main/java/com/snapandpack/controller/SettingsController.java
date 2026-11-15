@@ -1,5 +1,6 @@
 package com.snapandpack.controller;
 
+import com.snapandpack.security.Access;
 import com.snapandpack.service.SettingsService;
 import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,9 +28,9 @@ public class SettingsController {
         return settingsService.get();
     }
 
-    /** PUT /api/settings: saves changed site text and returns the full list. Admin only. */
+    /** PUT /api/settings: saves changed site text and returns the full list. Super admin only. */
     @PutMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize(Access.SUPER_ADMIN)
     public Map<String, String> update(@RequestBody Map<String, String> changes) {
         return settingsService.update(changes);
     }

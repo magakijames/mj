@@ -2,9 +2,11 @@
 
 // Where the Java backend runs.
 // Opened through the backend (for example http://localhost:8080): the API is on the same server.
-// Opened through VS Code Live Server (ports 5500 and up): the API is the backend on port 8080.
+// Opened through VS Code Live Server (ports 5500 and up): the API is the backend on port 8080 of the
+// same computer name, so the browser treats both as one site and sends the sign-in cookie.
 const LIVE_SERVER = /^55\d\d$/.test(location.port);
-export const API_BASE = LIVE_SERVER ? 'http://localhost:8080/api' : '/api';
+export const API_ORIGIN = LIVE_SERVER ? `http://${location.hostname}:8080` : '';
+export const API_BASE = API_ORIGIN + '/api';
 
 // The folder that holds index.html, worked out from this file's own address,
 // so links and images work from any page however the site is served.
@@ -15,30 +17,42 @@ export const url = path => new URL(path, ROOT).href;
 
 // Roles, as the backend names them, with the labels shown on screen.
 export const ROLES = {
+  SUPER_ADMIN: 'Super admin',
   ADMIN: 'Admin',
-  PRODUCT_MANAGER: 'Product manager',
+  INVENTORY_MANAGER: 'Inventory manager',
   ORDER_MANAGER: 'Order manager',
   SUPPORT: 'Support',
   CUSTOMER: 'Customer',
 };
 
 export const ROLE_NOTES = {
-  ADMIN: 'Controls everything, including site settings, staff accounts and roles.',
-  PRODUCT_MANAGER: 'Adds, edits and removes products and updates stock.',
+  SUPER_ADMIN: 'Controls everything, including site settings, the activity record, staff accounts and roles.',
+  ADMIN: 'Runs the shop day to day: products, stock and orders. Cannot manage accounts or settings.',
+  INVENTORY_MANAGER: 'Adds, edits and removes products and updates stock.',
   ORDER_MANAGER: 'Sees all orders and updates their status.',
   SUPPORT: 'Can look at orders and customers but cannot change them.',
   CUSTOMER: 'Shops and sees their own orders.',
 };
 
+// Groups of roles, matching the rules the backend enforces (see Access.java).
+export const CAN = {
+  editProducts: ['SUPER_ADMIN', 'ADMIN', 'INVENTORY_MANAGER'],
+  viewOrders: ['SUPER_ADMIN', 'ADMIN', 'ORDER_MANAGER', 'SUPPORT'],
+  editOrders: ['SUPER_ADMIN', 'ADMIN', 'ORDER_MANAGER'],
+  viewUsers: ['SUPER_ADMIN', 'SUPPORT'],
+  superAdmin: ['SUPER_ADMIN'],
+  staff: ['SUPER_ADMIN', 'ADMIN', 'INVENTORY_MANAGER', 'ORDER_MANAGER', 'SUPPORT'],
+};
+
 // Which roles may open each admin page. The backend enforces the same rules;
 // this list only decides which links and pages the front end shows.
 export const ADMIN_PAGES = [
-  { key: 'dashboard', label: 'Dashboard', path: 'admin/index.html', roles: ['ADMIN', 'PRODUCT_MANAGER', 'ORDER_MANAGER', 'SUPPORT'] },
-  { key: 'products', label: 'Products', path: 'admin/products.html', roles: ['ADMIN', 'PRODUCT_MANAGER'] },
-  { key: 'orders', label: 'Orders', path: 'admin/orders.html', roles: ['ADMIN', 'ORDER_MANAGER', 'SUPPORT'] },
-  { key: 'users', label: 'Users', path: 'admin/users.html', roles: ['ADMIN', 'SUPPORT'] },
-  { key: 'settings', label: 'Site settings', path: 'admin/settings.html', roles: ['ADMIN'] },
-  { key: 'activity', label: 'Activity', path: 'admin/activity.html', roles: ['ADMIN'] },
+  { key: 'dashboard', label: 'Dashboard', path: 'admin/index.html', roles: CAN.staff },
+  { key: 'products', label: 'Products', path: 'admin/products.html', roles: CAN.editProducts },
+  { key: 'orders', label: 'Orders', path: 'admin/orders.html', roles: CAN.viewOrders },
+  { key: 'users', label: 'Users', path: 'admin/users.html', roles: CAN.viewUsers },
+  { key: 'settings', label: 'Site settings', path: 'admin/settings.html', roles: CAN.superAdmin },
+  { key: 'activity', label: 'Activity', path: 'admin/activity.html', roles: CAN.superAdmin },
 ];
 
 export const ORDER_STATUSES = { PENDING: 'Pending', SHIPPED: 'Shipped', DELIVERED: 'Delivered', CANCELLED: 'Cancelled' };
@@ -100,5 +114,9 @@ export const ACTIVITY_LABELS = {
   USER_ACTIVATED: 'Account activated', USER_DEACTIVATED: 'Account deactivated',
   SETTINGS_UPDATED: 'Site settings changed',
   PASSWORD_RESET_REQUESTED: 'Password reset requested', PASSWORD_RESET_LINK_CREATED: 'Reset link created by admin',
-  PASSWORD_RESET_COMPLETED: 'Password changed', LOGIN_LOCKED: 'Sign-in locked',
+  PASSWORD_RESET_COMPLETED: 'Password changed',
+  ACCOUNT_REGISTERED: 'Customer registered', LOGIN_SUCCESS: 'Signed in', LOGIN_FAILED: 'Sign-in failed',
+  LOGIN_LOCKED: 'Sign-in locked', LOGOUT: 'Signed out',
+  PAYMENT_REQUESTED: 'Payment requested', PAYMENT_RECEIVED: 'Payment received', PAYMENT_FAILED: 'Payment failed',
+  PAYMENT_MISMATCH: 'Payment amount mismatch', PAYMENT_DUPLICATE: 'Order paid twice',
 };

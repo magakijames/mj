@@ -49,15 +49,16 @@ $('#cartLines').addEventListener('click', e => {
 $('#signInLink').href = url('pages/login.html') + '?next=' + encodeURIComponent(location.href);
 
 // Places the order: sends the cart lines, phone and address; the backend works out the prices.
+// Payment happens next, on the "My orders" page.
 $('#checkoutForm').addEventListener('submit', async e => {
   e.preventDefault();
   const error = $('#formError');
   error.textContent = '';
   const items = getCart().filter(line => products.some(p => p.id === line.productId));
   try {
-    await api('/orders', { method: 'POST', body: { items, phone: $('#phone').value.trim(), address: $('#address').value.trim() } });
+    const order = await api('/orders', { method: 'POST', body: { items, phone: $('#phone').value.trim(), address: $('#address').value.trim() } });
     clearCart();
-    location.href = url('pages/orders.html') + '?placed=1';
+    location.href = url('pages/orders.html') + '?placed=' + order.id;
   } catch (err) {
     error.textContent = err.message;
   }

@@ -3,12 +3,19 @@ package com.snapandpack.notification;
 import com.snapandpack.model.User;
 
 /**
- * Messages the shop sends to people. Today there is one implementation, LogNotifier, which only writes
- * to the server log. Email, SMS and WhatsApp will be added later as further implementations of this
- * interface, without changing the code that calls it.
+ * One way of reaching a person outside the site: the server log, email, SMS or WhatsApp.
+ * Every class that implements this interface and is switched on receives each message.
+ * To add a new channel, write a class like EmailNotifier; nothing else needs to change.
  */
 public interface Notifier {
 
+    /** Sends a short message with a subject line to one user. */
+    void send(User user, String subject, String message);
+
     /** Tells a user how to choose a new password. The link works once and for a limited time. */
-    void sendPasswordReset(User user, String link);
+    default void sendPasswordReset(User user, String link) {
+        send(user, "Reset your password",
+                "Open this link to choose a new password. It works once and for 30 minutes:\n" + link
+                        + "\n\nIf you did not ask for this, you can ignore this message.");
+    }
 }

@@ -21,12 +21,15 @@ public class UserService {
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;
     private final AuditService audit;
+    private final NotificationService notifications;
 
     /** Receives the services and database access this class needs. */
-    public UserService(UserRepository users, PasswordEncoder passwordEncoder, AuditService audit) {
+    public UserService(UserRepository users, PasswordEncoder passwordEncoder, AuditService audit,
+                       NotificationService notifications) {
         this.users = users;
         this.passwordEncoder = passwordEncoder;
         this.audit = audit;
+        this.notifications = notifications;
     }
 
     /** One account's details. */
@@ -35,11 +38,11 @@ public class UserService {
         return UserResponse.from(find(id));
     }
 
-    /** The account list for the Users page: the admin sees every account, support staff see customers only. */
+    /** The account list for the Users page: the super admin sees every account, support staff see customers only. */
     @Transactional(readOnly = true)
     public List<UserResponse> list(Long viewerId) {
         User viewer = find(viewerId);
-        List<User> result = viewer.getRole() == Role.ADMIN
+        List<User> result = viewer.getRole() == Role.SUPER_ADMIN
                 ? users.findAllByOrderByCreatedAtDesc()
                 : users.findByRoleOrderByCreatedAtDesc(Role.CUSTOMER);
         return result.stream().map(UserResponse::from).toList();
@@ -84,6 +87,7 @@ public class UserService {
         Role before = user.getRole();
         user.setRole(role);
         audit.record("USER_ROLE_CHANGED", user.getEmail() + ": " + before + " to " + role);
+        notifications.notify(user, "Your role has changed", "Your account role is now " + label(role) + ".", null);
         return UserResponse.from(user);
     }
 
@@ -100,6 +104,11 @@ public class UserService {
         user.setActive(active);
         audit.record(active ? "USER_ACTIVATED" : "USER_DEACTIVATED", user.getEmail());
         return UserResponse.from(user);
+    }
+
+    /** A role name as people read it, for example ORDER_MANAGER becomes "order manager". */
+    private static String label(Role role) {
+        return role.name().toLowerCase().replace('_', ' ');
     }
 
     /** Loads an account or fails with "not found". */

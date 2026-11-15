@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -32,7 +33,8 @@ public final class OrderDtos {
     /** What checkout sends. Prices are never taken from the browser; they are read from the database. */
     public record CreateOrderRequest(
             @NotEmpty(message = "Your cart is empty") @Size(max = 50, message = "Too many different items in one order") List<@Valid OrderItemRequest> items,
-            @NotBlank(message = "Enter a phone number") @Size(max = 30) String phone,
+            @NotBlank(message = "Enter a phone number")
+            @Pattern(regexp = "^\\+?[0-9][0-9 ]{8,17}$", message = "Enter a valid phone number, digits only") String phone,
             @NotBlank(message = "Enter a delivery address") @Size(max = 500) String address) {
     }
 
@@ -52,13 +54,14 @@ public final class OrderDtos {
 
     /** A saved order as the front end sees it. */
     public record OrderResponse(Long id, Instant createdAt, OrderStatus status, BigDecimal total, String customerName,
-                                String customerEmail, String phone, String address, List<OrderItemResponse> items) {
+                                String customerEmail, String phone, String address, boolean paid,
+                                String paymentReference, List<OrderItemResponse> items) {
 
         /** Copies an order, its customer and its lines from the database into a response. */
         public static OrderResponse from(CustomerOrder order) {
             return new OrderResponse(order.getId(), order.getCreatedAt().toInstant(ZoneOffset.UTC), order.getStatus(),
                     order.getTotal(), order.getUser().getName(), order.getUser().getEmail(), order.getPhone(),
-                    order.getAddress(), order.getItems().stream().map(OrderItemResponse::from).toList());
+                    order.getAddress(), order.isPaid(), order.getPaymentReference(), order.getItems().stream().map(OrderItemResponse::from).toList());
         }
     }
 }

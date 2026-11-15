@@ -40,6 +40,7 @@ $('#settingsForm').addEventListener('submit', async e => {
   }
 });
 
+// Only the super admin can open this page.
 if (await openAdminPage('settings')) {
   try {
     render(await api('/settings'));

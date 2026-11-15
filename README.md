@@ -4,7 +4,7 @@ An online store for bags and caps, in three parts:
 
 ```
 frontend/   The website (HTML, CSS, JavaScript). Open it with VS Code Live Server.
-backend/    The API (Java 17, Spring Boot, Maven). Open it in IntelliJ IDEA, Eclipse or VS Code.
+backend/    The API (Java 21, Spring Boot, Maven). Open it in IntelliJ IDEA, Eclipse or VS Code.
 database/   SQL scripts for Microsoft SQL Server.
 ```
 
@@ -16,17 +16,21 @@ In SQL Server Management Studio, connected as an administrator, run these in ord
 | --- | --- |
 | `database/01_create_database.sql` | Creates an empty database called `SnapAndPack`. |
 | `database/02_schema.sql` | Creates the main tables. Select the `SnapAndPack` database first. |
-| `database/03_security_and_settings.sql` | Adds sign-in protection, password reset links, editable site text, the activity record and extra data rules. Select the `SnapAndPack` database first. |
-| `database/04_app_login_permissions.sql` | Gives the backend's login (`clearance_app`) only the rights it needs, table by table. Edit the login name inside the script if yours is different. |
+| `database/03_security_and_settings.sql` | Adds sign-in protection, password reset links, editable site text, the activity record and extra data rules. |
+| `database/05_roles_payments_notifications.sql` | Adds the new staff roles, room for Argon2id password hashes, sign-out support, M-Pesa payments and notifications. |
+| `database/04_app_login_permissions.sql` | Run last, and again after any script that adds tables. Gives the backend's login (`clearance_app`) only the rights it needs, through a database role. Edit the login name inside the script if yours is different. |
 
-**Upgrading a database that is already running:** run only `03` and then `04`. Your products, accounts
-and orders are kept.
+Select the `SnapAndPack` database before running 02, 03 and 05.
+
+**Upgrading a database that is already running:** run only the scripts you have not run yet, in number
+order, and then `04` again. Your products, accounts and orders are kept. Script 05 renames the old
+`ADMIN` role to `SUPER_ADMIN` and `PRODUCT_MANAGER` to `INVENTORY_MANAGER`.
 
 The backend connects with SQL Server authentication (a login name and password), over TCP on port 1433.
 
 ## 2. Backend (Java)
 
-You need JDK 17 or newer. Nothing else: Maven is downloaded for you the first time.
+You need JDK 21 or newer. Nothing else: Maven is downloaded for you the first time.
 
 **On Windows, with the batch files** (in the `backend` folder):
 
@@ -49,7 +53,7 @@ When the log says "Snap & Pack is running", open <http://localhost:8080> in your
 serves the website as well as the API, so that one address is the whole store. On its first start it
 creates the admin account and loads the 57 starting products.
 
-**First admin sign-in:** `admin@snapandpack.local` / `ChangeMe123!`
+**First super admin sign-in:** `admin@snapandpack.local` / `ChangeMe123!`
 Change these before real use: set `ADMIN_EMAIL` and `ADMIN_PASSWORD` before the first start, and set
 `JWT_SECRET` to a long random value.
 
@@ -72,19 +76,60 @@ VS Code Live Server still works if you prefer it: open the `frontend` folder and
 
 | Role | What they can do |
 | --- | --- |
-| Admin | Everything: products, orders, site settings, the activity record, creating staff, changing roles, switching accounts on or off, making password reset links |
-| Product manager | Add, edit and delete products; update stock |
-| Order manager | See all orders and change their status |
+| Super admin | Everything: products, orders, site settings, the activity record, creating staff, changing roles, switching accounts on or off, making password reset links |
+| Admin | Runs the shop day to day: products, stock and orders. No access to accounts, settings or the activity record |
+| Inventory manager | Add, edit and delete products; upload photos; update stock |
+| Order manager | See all orders, change their status, re-check a payment with M-Pesa |
 | Support | See orders and customers, without changing anything |
-| Customer | Shop, place orders, see their own orders |
+| Customer | Shop, place orders, pay with M-Pesa, see their own orders |
 
-Anyone can register as a customer. Staff accounts are created by the admin on the Users page, which
-lists staff and customers on separate tabs. The backend checks the role on every request; the front end
-only hides what a role cannot use.
+Anyone can register as a customer. Staff accounts are created by the super admin on the Users page,
+which lists staff and customers on separate tabs. The backend checks the role on every request; the
+front end only hides what a role cannot use.
+
+## Notifications
+
+Every signed-in user has a **Notifications** link in the header with a count of unseen messages.
+
+| Who | Is told when |
+| --- | --- |
+| Customer | Their order is received, its status changes, a payment succeeds or fails, their role changes |
+| Super admin, admin, order manager | A new order arrives, an order is paid, a payment needs checking |
+| Super admin, admin, inventory manager | A product's stock falls to 5 or fewer |
+
+Messages to customers also go out through every outside channel that is switched on:
+
+| Channel | State | To switch on |
+| --- | --- | --- |
+| Server log | On (for testing) | Set `NOTIFICATIONS_LOG=false` on the live site |
+| Email | Code ready, off, not yet tried against a mail server | Steps at the top of `EmailNotifier.java` |
+| SMS | Placeholder only | Steps at the top of `SmsNotifier.java` |
+| WhatsApp | Placeholder only | Steps at the top of `WhatsAppNotifier.java` |
+
+## Payments (M-Pesa)
+
+After placing an order the customer pays from **My orders** with "Pay with M-Pesa".
+
+- **Test mode (the default):** nothing is sent to Safaricom and no money moves. The payment confirms
+  itself a moment later through the same code a real Safaricom confirmation uses, and gets a receipt
+  number starting with `SIM`.
+- **Real mode:** set `MPESA_MODE=live` and the Daraja details. The steps are at the top of
+  `DarajaMpesaGateway.java`. This code follows Safaricom's published API but has not yet been run
+  against Safaricom, so try it in the Daraja sandbox first.
+
+The amount always comes from the order in the database. An order is marked paid only when M-Pesa
+confirms it, the confirmation must match a request the shop made and the order's amount, and a
+confirmation that arrives twice is counted once. Staff can press "Check with M-Pesa" on an unpaid order
+if a confirmation never arrived.
+
+## Product photos
+
+Staff who manage products can upload a JPEG or PNG (up to 2 MB) from the product form. Files are kept
+in an `uploads` folder beside `backend` and `frontend`. Back that folder up along with the database.
 
 ## Site settings
 
-On the admin **Site settings** page the admin can change the shop name, the line under it, the
+On the admin **Site settings** page the super admin can change the shop name, the line under it, the
 announcement bar, the home page headline, the four promise boxes (shipping, returns, support, checkout),
 the footer line and the contact details. The text is stored in the database.
 
@@ -93,36 +138,26 @@ the footer line and the contact details. The text is stored in the database.
 1. The user clicks "Forgot your password?" on the sign-in page and enters their email.
 2. A reset link is created. It works once, for 30 minutes, and a newer link cancels older ones.
 3. **Until email is connected**, the link is written to the server log (`backend/logs/server.log`), and
-   the admin can also make a link for any account with "Reset password" on the Users page and pass it on.
+   the super admin can also make a link for any account with "Reset password" on the Users page and pass it on.
 4. Opening the link lets the user choose a new password. Their old sign-ins stop working.
 
 When email is added later, it replaces `LogNotifier` (see `backend/.../notification/`); nothing else changes.
 
 ## Security
 
-- Passwords are stored only as BCrypt hashes, and must be 8 to 72 characters with a letter and a number.
-- Five wrong passwords in a row lock an account for 15 minutes.
-- Sign-in tokens stop working when a password is reset or an account is switched off.
-- Reset links are stored only as hashes, so reading the database does not reveal a usable link.
-- The database refuses bad data itself (CHECK, UNIQUE and FOREIGN KEY rules), and the backend's login can
-  neither delete accounts or orders nor change the activity record (`04_app_login_permissions.sql`).
-- Every change by staff and every sign-in lock or password reset is written to the activity record.
-- Pages are sent with a Content-Security-Policy and other protective headers.
-- All database access uses parameters, never text pasted into SQL.
-
-Before going live, also set `JWT_SECRET` to a long random value, change the first admin password, and
-serve the site over HTTPS.
+`SECURITY.md` lists every point of the security plan with what is built, what is ready but switched
+off, and what has to be done when the site is deployed.
 
 ## Folder guide
 
 ```
 frontend/
   index.html                 Store home page
-  pages/                     login, register, forgot-password, reset-password, cart (with checkout), orders
+  pages/                     login, register, forgot-password, reset-password, cart (with checkout), orders, notifications
   admin/                     index (dashboard), products, orders, users, settings, activity
   assets/
     css/                     base.css (shared), store.css, admin.css
-    js/core/                 config, api, auth, cart-store, settings, ui  (shared by all pages)
+    js/core/                 config, api, auth, cart-store, settings, notifications, ui  (shared by all pages)
     js/pages/                one script per store page
     js/admin/                one script per admin page, plus layout.js
     images/                  product photos
@@ -133,8 +168,9 @@ backend/src/main/java/com/snapandpack/
   repository/                database access
   model/                     the tables as Java classes
   dto/                       the shapes of requests and responses
-  security/                  sign-in tokens, password rules
-  notification/              messages to users (log only for now; email, SMS and WhatsApp later)
+  security/                  sign-in cookie and tokens, CSRF, rate limits, password rules, role rules
+  notification/              outside channels: log, email, and SMS and WhatsApp placeholders
+  payment/                   M-Pesa: test stand-in and the real Daraja link
   web/                       helper for building links to the site
   config/                    security rules, first-run data
   exception/                 error messages sent to the front end
@@ -146,7 +182,10 @@ database/
   01_create_database.sql
   02_schema.sql
   03_security_and_settings.sql
-  04_app_login_permissions.sql
+  04_app_login_permissions.sql      (run last, and again after 05)
+  05_roles_payments_notifications.sql
+
+uploads/                     product photos uploaded by staff (created on first upload)
 ```
 
 ## API summary
@@ -155,27 +194,37 @@ database/
 | --- | --- | --- |
 | `POST /api/auth/register` | anyone | Create a customer account |
 | `POST /api/auth/login` | anyone | Sign in |
+| `POST /api/auth/logout` | signed in | Sign out |
 | `GET /api/auth/me` | signed in | Current user and role |
 | `POST /api/auth/forgot-password` | anyone | Create a password reset link |
 | `POST /api/auth/reset-password` | anyone with a link | Set a new password |
 | `GET /api/products`, `GET /api/products/{id}` | anyone | Browse products |
-| `POST /api/products`, `PUT/DELETE /api/products/{id}` | Admin, Product manager | Manage products |
+| `POST /api/products`, `PUT/DELETE /api/products/{id}` | Super admin, Admin, Inventory manager | Manage products |
+| `POST /api/uploads/product-image` | Super admin, Admin, Inventory manager | Upload a product photo |
 | `POST /api/orders` | signed in | Place an order |
 | `GET /api/orders/mine` | signed in | Own orders |
-| `GET /api/orders` | Admin, Order manager, Support | All orders |
-| `PATCH /api/orders/{id}/status` | Admin, Order manager | Change order status |
-| `GET /api/users` | Admin (all), Support (customers) | List accounts |
-| `POST /api/users` | Admin | Create an account with any role |
-| `PATCH /api/users/{id}/role`, `PATCH /api/users/{id}/active` | Admin | Change role, switch on or off |
-| `POST /api/users/{id}/password-reset` | Admin | Make a reset link for an account |
+| `POST /api/orders/{id}/pay` | the order's owner | Start an M-Pesa payment |
+| `POST /api/orders/{id}/payment/check` | owner, order staff | Ask M-Pesa how the payment ended |
+| `POST /api/payments/mpesa/callback/{secret}` | Safaricom | Payment result |
+| `GET /api/notifications`, `GET /api/notifications/unread-count` | signed in | Own notifications |
+| `POST /api/notifications/{id}/read`, `POST /api/notifications/read-all` | signed in | Mark as seen |
+| `GET /api/orders` | Super admin, Admin, Order manager, Support | All orders |
+| `PATCH /api/orders/{id}/status` | Super admin, Admin, Order manager | Change order status |
+| `GET /api/users` | Super admin (all), Support (customers) | List accounts |
+| `POST /api/users` | Super admin | Create an account with any role |
+| `PATCH /api/users/{id}/role`, `PATCH /api/users/{id}/active` | Super admin | Change role, switch on or off |
+| `POST /api/users/{id}/password-reset` | Super admin | Make a reset link for an account |
 | `GET /api/settings` | anyone | Shop name and site text |
-| `PUT /api/settings` | Admin | Change site text |
-| `GET /api/audit` | Admin | Activity record |
+| `PUT /api/settings` | Super admin | Change site text |
+| `GET /api/audit` | Super admin | Activity record |
 | `GET /api/dashboard/stats` | any staff | Dashboard totals |
 
 ## Not built yet
 
-- Payment. Orders are saved, but no money is collected.
-- Email, SMS and WhatsApp messages. Password reset links are handed over by the admin until email is connected.
+See `SECURITY.md` for the full list. The main gaps:
+
+- Real M-Pesa and email have code but have not been run against Safaricom or a mail server.
+- SMS and WhatsApp are placeholders.
+- A second sign-in step (MFA) for administrators, and confirming a new account's email address.
+- Refunds, and managing product categories from the admin area (categories are fixed as Bag and Cap).
 - Changing your own password while signed in (use "Forgot your password?" for now).
-- Uploading product photos from the admin page (photos are added to `frontend/assets/images` by hand).

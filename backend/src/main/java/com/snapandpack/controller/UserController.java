@@ -5,6 +5,7 @@ import com.snapandpack.dto.UserDtos.CreateUserRequest;
 import com.snapandpack.dto.UserDtos.UpdateActiveRequest;
 import com.snapandpack.dto.UserDtos.UpdateRoleRequest;
 import com.snapandpack.dto.UserDtos.UserResponse;
+import com.snapandpack.security.Access;
 import com.snapandpack.security.CurrentUser;
 import com.snapandpack.service.PasswordResetService;
 import com.snapandpack.service.UserService;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Addresses for accounts (/api/users). Only the admin can create staff, change roles or switch accounts on and off. */
+/** Addresses for accounts (/api/users). Only the super admin can create staff, change roles or switch accounts on and off. */
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -39,40 +40,40 @@ public class UserController {
         this.siteUrl = siteUrl;
     }
 
-    /** GET /api/users: the account list. The admin gets everyone; support gets customers only. */
+    /** GET /api/users: the account list. The super admin gets everyone; support gets customers only. */
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
+    @PreAuthorize(Access.USER_VIEWERS)
     public List<UserResponse> list(Authentication authentication) {
         return userService.list(CurrentUser.id(authentication));
     }
 
-    /** POST /api/users: creates an account with any role. Admin only. */
+    /** POST /api/users: creates an account with any role. Super admin only. */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize(Access.SUPER_ADMIN)
     public UserResponse create(@Valid @RequestBody CreateUserRequest request) {
         return userService.create(request);
     }
 
-    /** PATCH /api/users/{id}/role: changes what an account may do. Admin only. */
+    /** PATCH /api/users/{id}/role: changes what an account may do. Super admin only. */
     @PatchMapping("/{id}/role")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize(Access.SUPER_ADMIN)
     public UserResponse changeRole(Authentication authentication, @PathVariable Long id,
                                    @Valid @RequestBody UpdateRoleRequest request) {
         return userService.changeRole(CurrentUser.id(authentication), id, request.role());
     }
 
-    /** PATCH /api/users/{id}/active: switches an account off or back on. Admin only. */
+    /** PATCH /api/users/{id}/active: switches an account off or back on. Super admin only. */
     @PatchMapping("/{id}/active")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize(Access.SUPER_ADMIN)
     public UserResponse setActive(Authentication authentication, @PathVariable Long id,
                                   @Valid @RequestBody UpdateActiveRequest request) {
         return userService.setActive(CurrentUser.id(authentication), id, request.active());
     }
 
-    /** POST /api/users/{id}/password-reset: makes a one-time reset link for the admin to pass on. Admin only. */
+    /** POST /api/users/{id}/password-reset: makes a one-time reset link for the admin to pass on. Super admin only. */
     @PostMapping("/{id}/password-reset")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize(Access.SUPER_ADMIN)
     public ResetLinkResponse createResetLink(@PathVariable Long id) {
         return passwordResetService.createLinkForUser(id, siteUrl.current());
     }

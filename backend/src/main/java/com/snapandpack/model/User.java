@@ -50,6 +50,10 @@ public class User {
     @Column(name = "password_changed_at")
     private LocalDateTime passwordChangedAt;
 
+    /** Set when the user signs out (UTC). Sign-in tokens issued before this stop working. */
+    @Column(name = "sessions_valid_after")
+    private LocalDateTime sessionsValidAfter;
+
     /** Stored in UTC. */
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -86,6 +90,9 @@ public class User {
 
     public LocalDateTime getPasswordChangedAt() { return passwordChangedAt; }
     public void setPasswordChangedAt(LocalDateTime passwordChangedAt) { this.passwordChangedAt = passwordChangedAt; }
+
+    public LocalDateTime getSessionsValidAfter() { return sessionsValidAfter; }
+    public void setSessionsValidAfter(LocalDateTime sessionsValidAfter) { this.sessionsValidAfter = sessionsValidAfter; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

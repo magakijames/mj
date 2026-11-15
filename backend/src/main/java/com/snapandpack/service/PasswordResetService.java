@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.HexFormat;
+import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,23 +35,23 @@ public class PasswordResetService {
     private final PasswordResetTokenRepository tokens;
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;
-    private final Notifier notifier;
+    private final List<Notifier> channels;
     private final AuditService audit;
     private final SecureRandom random = new SecureRandom();
 
     /** Receives the services and database access this class needs. */
     public PasswordResetService(PasswordResetTokenRepository tokens, UserRepository users,
-                                PasswordEncoder passwordEncoder, Notifier notifier, AuditService audit) {
+                                PasswordEncoder passwordEncoder, List<Notifier> channels, AuditService audit) {
         this.tokens = tokens;
         this.users = users;
         this.passwordEncoder = passwordEncoder;
-        this.notifier = notifier;
+        this.channels = channels;
         this.audit = audit;
     }
 
     /**
      * Handles the "forgot password" form. When the email belongs to an active account, makes a reset link
-     * and hands it to the notifier. Does nothing visible otherwise, so the reply never reveals
+     * and sends it through every channel that is switched on (the server log, and email once connected). Does nothing visible otherwise, so the reply never reveals
      * whether an email has an account.
      */
     @Transactional
@@ -60,7 +61,7 @@ public class PasswordResetService {
             return;
         }
         String link = createLink(user, siteUrl);
-        notifier.sendPasswordReset(user, link);
+        channels.forEach(channel -> channel.sendPasswordReset(user, link));
         audit.record(user, "PASSWORD_RESET_REQUESTED", "Reset link requested from the sign-in page");
     }
 

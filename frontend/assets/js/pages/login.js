@@ -23,9 +23,9 @@ $('#loginForm').addEventListener('submit', async e => {
   const error = $('#formError');
   error.textContent = '';
   try {
-    const auth = await api('/auth/login', { method: 'POST', anonymous: true, body: { email: $('#email').value.trim(), password: $('#password').value } });
-    setAuth(auth);
-    goAfterSignIn(auth.user);
+    const user = await api('/auth/login', { method: 'POST', anonymous: true, body: { email: $('#email').value.trim(), password: $('#password').value } });
+    setAuth(user);
+    goAfterSignIn(user);
   } catch (err) {
     error.textContent = err.message;
   }

@@ -1,6 +1,6 @@
 // Admin orders page: every order, with a status control for roles allowed to change it.
 import { api } from '../core/api.js';
-import { ORDER_STATUSES } from '../core/config.js';
+import { ORDER_STATUSES, CAN } from '../core/config.js';
 import { $, esc, money, dateTime, toast } from '../core/ui.js';
 import { openAdminPage, showError } from './layout.js';
 
@@ -29,7 +29,9 @@ function row(o) {
     <header><b>Order #${o.id}</b><span class="meta">${dateTime(o.createdAt)}</span><span class="grow"></span>${control}</header>
     <p class="meta">${esc(o.customerName)} · ${esc(o.customerEmail)} · ${esc(o.phone)}<br>${esc(o.address)}</p>
     <ul>${o.items.map(i => `<li>${i.quantity} × ${esc(i.productName)} <span class="meta">(${esc(i.color)}, ${esc(i.size)})</span></li>`).join('')}</ul>
-    <b>Total ${money(o.total)}</b>
+    <p class="pay"><b>Total ${money(o.total)}</b>
+      ${o.paid ? `<span class="status delivered">Paid</span> <span class="meta">M-Pesa receipt ${esc(o.paymentReference)}</span>`
+        : `<span class="status pending">Not paid</span>${canEdit && o.status !== 'CANCELLED' ? ` <button class="btn small ghost" data-check="${o.id}">Check with M-Pesa</button>` : ''}`}</p>
   </article>`;
 }
 
@@ -47,9 +49,23 @@ $('#orderList').addEventListener('change', async e => {
   load();
 });
 
+// "Check with M-Pesa": asks M-Pesa how the order's latest payment request ended, for when no
+// confirmation arrived by itself.
+$('#orderList').addEventListener('click', async e => {
+  const button = e.target.closest('[data-check]');
+  if (!button) return;
+  try {
+    const payment = await api(`/orders/${button.dataset.check}/payment/check`, { method: 'POST' });
+    toast({ SUCCESS: 'Payment confirmed', FAILED: 'That payment failed', PENDING: 'M-Pesa has no answer yet' }[payment.status]);
+  } catch (error) {
+    toast(error.message);
+  }
+  load();
+});
+
 const user = await openAdminPage('orders');
 if (user) {
-  canEdit = ['ADMIN', 'ORDER_MANAGER'].includes(user.role);
+  canEdit = CAN.editOrders.includes(user.role);
   if (!canEdit) $('#readOnlyNote').hidden = false;
   load();
 }

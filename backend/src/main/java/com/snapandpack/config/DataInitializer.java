@@ -57,13 +57,13 @@ public class DataInitializer implements ApplicationRunner {
         loadStartingProducts();
     }
 
-    /** Creates the admin account from application.properties, but only when no admin exists yet. */
+    /** Creates the super admin account from application.properties, but only when none exists yet. */
     private void createFirstAdmin() {
-        if (users.existsByRole(Role.ADMIN)) {
+        if (users.existsByRole(Role.SUPER_ADMIN)) {
             return;
         }
-        userService.createAccount(adminName, adminEmail, adminPassword, Role.ADMIN);
-        log.info("Created the first admin account: {}", adminEmail.trim().toLowerCase());
+        userService.createAccount(adminName, adminEmail, adminPassword, Role.SUPER_ADMIN);
+        log.info("Created the first super admin account: {}", adminEmail.trim().toLowerCase());
     }
 
     /** Reads seed/products.json into the products table, but only when the table is empty. */

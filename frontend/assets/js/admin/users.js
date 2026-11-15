@@ -1,5 +1,5 @@
 // Admin users page, with staff and customers on separate tabs.
-// The admin adds staff, changes roles, switches accounts on or off and makes password reset links.
+// The super admin adds staff, changes roles, switches accounts on or off and makes password reset links.
 // Support staff see the customer list only, without the controls.
 import { api } from '../core/api.js';
 import { ROLES, ROLE_NOTES } from '../core/config.js';
@@ -38,14 +38,14 @@ function render() {
   $('#userTable').innerHTML = list.length ? table(list) : `<p class="empty">${tab === 'staff' ? 'No staff yet.' : 'No customers yet.'}</p>`;
 }
 
-// The HTML table for a list of accounts. The role and action columns are for the admin only.
+// The HTML table for a list of accounts. The role and action columns are for the super admin only.
 function table(list) {
   return `<table class="tbl">
     <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th>${isAdmin ? '<th><span class="visually-hidden">Actions</span></th>' : ''}</tr></thead>
     <tbody>${list.map(userRow).join('')}</tbody></table>`;
 }
 
-// The HTML for one account's row. The admin's own row has no controls, so they cannot lock themselves out.
+// The HTML for one account's row. The super admin's own row has no controls, so they cannot lock themselves out.
 function userRow(u) {
   const self = u.id === me.id;
   const role = isAdmin && !self
@@ -146,7 +146,7 @@ document.addEventListener('click', e => {
 // Shows what the role chosen in the "Add staff account" form can do.
 const showRoleNote = () => { $('#roleNote').textContent = ROLE_NOTES[$('#uRole').value]; };
 $('#uRole').innerHTML = Object.entries(ROLES).filter(([value]) => value !== 'CUSTOMER')
-  .map(([value, label]) => `<option value="${value}" ${value === 'PRODUCT_MANAGER' ? 'selected' : ''}>${label}</option>`).join('');
+  .map(([value, label]) => `<option value="${value}" ${value === 'INVENTORY_MANAGER' ? 'selected' : ''}>${label}</option>`).join('');
 $('#uRole').addEventListener('change', showRoleNote);
 
 // Creates the staff account from the form.
@@ -165,7 +165,7 @@ $('#userForm').addEventListener('submit', async e => {
 
 me = await openAdminPage('users');
 if (me) {
-  isAdmin = me.role === 'ADMIN';
+  isAdmin = me.role === 'SUPER_ADMIN';
   tab = isAdmin ? 'staff' : 'customers';
   $('#pageTitle').textContent = isAdmin ? 'Users' : 'Customers';
   $('#addUser').hidden = !isAdmin;

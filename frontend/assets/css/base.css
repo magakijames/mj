@@ -80,3 +80,25 @@ a.btn{display:inline-block;text-align:center}
 .nowrap{white-space:nowrap}
 .panel .note{margin:0 0 14px}
 .swap{margin:14px 0 0}
+
+/* ---- pinned header, notifications ---- */
+/* The top bar and header stay at the top of the screen while the page scrolls. */
+#siteHeader{position:sticky;top:0;z-index:25;box-shadow:0 1px 0 var(--line)}
+.bell{position:relative;display:inline-flex;align-items:center;gap:6px}
+.count{background:var(--red);color:#fff;font-size:11px;font-weight:700;min-width:18px;height:18px;padding:0 5px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center}
+.notif{background:#fff;border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.notif.unread{border-left:3px solid var(--brass)}
+.notif p{margin:4px 0 0;font-size:14px;color:var(--muted)}
+.notif a{color:var(--ink)}
+/* On a phone the header is kept short so it does not cover the page: the announcement and tagline are dropped. */
+@media(max-width:860px){
+  #siteHeader .topbar{display:none}
+  #siteHeader .header{padding:10px 4%;gap:8px 12px}
+  #siteHeader .logo{font-size:22px}
+  #siteHeader .logo small{display:none}
+  #siteHeader .search{order:3;flex-basis:100%}
+  #siteHeader .search input{padding:8px 12px}
+  #siteHeader .actions{margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+  #siteHeader .link{padding:6px 8px;font-size:13px}
+  .notif{flex-direction:column;gap:6px}
+}

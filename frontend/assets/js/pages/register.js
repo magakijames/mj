@@ -17,12 +17,12 @@ $('#registerForm').addEventListener('submit', async e => {
   const error = $('#formError');
   error.textContent = '';
   try {
-    const auth = await api('/auth/register', {
+    const user = await api('/auth/register', {
       method: 'POST', anonymous: true,
       body: { name: $('#name').value.trim(), email: $('#email').value.trim(), password: $('#password').value },
     });
-    setAuth(auth);
-    goAfterSignIn(auth.user);
+    setAuth(user);
+    goAfterSignIn(user);
   } catch (err) {
     error.textContent = err.message;
   }

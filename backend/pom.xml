@@ -17,7 +17,7 @@
   <description>REST API for the Snap &amp; Pack bags and caps store</description>
 
   <properties>
-    <java.version>17</java.version>
+    <java.version>21</java.version>
   </properties>
 
   <dependencies>
@@ -42,6 +42,18 @@
       <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
     </dependency>
 
+    <!-- Sending email (used only when app.mail.enabled=true) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+    <!-- Needed by the Argon2id password hashing -->
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>1.78.1</version>
+    </dependency>
+
     <!-- Microsoft SQL Server: the real database -->
     <dependency>
       <groupId>com.microsoft.sqlserver</groupId>
@@ -61,6 +73,24 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <!-- Checks the libraries this project uses against the public list of known security holes.
+       Run it now and then with:  mvnw -Psecurity-scan dependency-check:check
+       The first run downloads a large database and is much faster with a free NVD API key. -->
+  <profiles>
+    <profile>
+      <id>security-scan</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.owasp</groupId>
+            <artifactId>dependency-check-maven</artifactId>
+            <version>10.0.4</version>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <build>
     <plugins>
