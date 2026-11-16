@@ -34,8 +34,8 @@ Nothing here has been run against a real Microsoft SQL Server, Safaricom or a ma
 | Sign-in rate limiting | Built: 20 sign-in, register and reset requests a minute per address (`RATE_LIMIT_AUTH`) |
 | Temporary lockout | Built: 5 wrong passwords lock the account for 15 minutes |
 | Session expiration | Built: a sign-in lasts 8 hours (`app.jwt.hours-valid`), then the user signs in again. It does not end sooner when the user is idle |
-| Account verification (confirming the email or phone) | Not built. Needs email or SMS switched on first |
-| Multi-factor authentication for administrators | Not built |
+| Account verification | Built for email: a new customer must open a 24-hour link before ordering. Until email is switched on, the link is in the server log and the super admin can confirm by hand. Phone numbers are not verified |
+| Multi-factor authentication for administrators | Built: authenticator-app codes with one-time recovery codes. Required for super admins and admins, optional for everyone else |
 
 ### B. Authorization
 
@@ -119,13 +119,14 @@ The only exemption is the address Safaricom reports payments to.
 | Secure cookie | Built, switched on with `COOKIES_SECURE=true` once the site has HTTPS |
 | New sign-in value at each sign-in, invalidated at sign-out | Built |
 | Expiry of inactive sessions | Partly: sign-ins end after 8 hours whether used or not |
-| MFA for administrative sessions | Not built |
+| MFA for administrative sessions | Built. An administrator without it set up cannot use any staff function |
 
 ### K. Logging and monitoring
 
 | Event | State |
 | --- | --- |
 | Sign-in, failed sign-in, lockout, sign-out | Built, in the activity record |
+| Two-step sign-in switched on, off or reset; recovery code used; email confirmed | Built |
 | Admin activity, product changes, order changes, permission changes | Built |
 | Payments | Built: requested, received, failed, amount mismatch, paid twice |
 | Refunds | Not built (no refunds yet) |
@@ -153,7 +154,7 @@ The only exemption is the address Safaricom reports payments to.
 
 ## Before going live
 
-1. Set `JWT_SECRET` to a long random value and change the first super admin password.
+1. Set `JWT_SECRET` and `MFA_ENCRYPTION_KEY` to long random values and change the first super admin password.
 2. Put the site behind HTTPS, then set `COOKIES_SECURE=true`, `CORS_ALLOWED_ORIGINS` and `PUBLIC_URL`.
 3. Set `NOTIFICATIONS_LOG=false`.
 4. Try M-Pesa in the Daraja sandbox, then switch to live keys.

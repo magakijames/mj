@@ -1,4 +1,4 @@
-// Sign-in page.
+// Sign-in page, including the second step for accounts with two-step sign-in.
 import { api } from '../core/api.js';
 import { setAuth, getUser, goAfterSignIn } from '../core/auth.js';
 import { $, mountStoreChrome } from '../core/ui.js';
@@ -17,16 +17,33 @@ if (new URLSearchParams(location.search).has('reset')) {
   $('#notice').hidden = false;
 }
 
-// Sends the email and password to the backend; on success saves the sign-in and moves on.
+// Shows the box for the authenticator code, when the server says the account needs one.
+function askForCode() {
+  $('#codeField').hidden = false;
+  $('#code').required = true;
+  $('#code').focus();
+}
+
+// Sends the email and password (and the code, once asked for) to the backend.
+// On success remembers who signed in and moves on.
 $('#loginForm').addEventListener('submit', async e => {
   e.preventDefault();
   const error = $('#formError');
   error.textContent = '';
+  const body = { email: $('#email').value.trim(), password: $('#password').value };
+  if (!$('#codeField').hidden) body.code = $('#code').value.trim();
   try {
-    const user = await api('/auth/login', { method: 'POST', anonymous: true, body: { email: $('#email').value.trim(), password: $('#password').value } });
+    const user = await api('/auth/login', { method: 'POST', anonymous: true, body });
     setAuth(user);
     goAfterSignIn(user);
   } catch (err) {
-    error.textContent = err.message;
+    if (err.data.mfaRequired) {
+      askForCode();
+      $('#notice').textContent = err.message;
+      $('#notice').hidden = false;
+    } else {
+      error.textContent = err.message;
+      if (!$('#codeField').hidden) $('#code').select();
+    }
   }
 });

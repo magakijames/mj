@@ -3,6 +3,7 @@ package com.snapandpack.service;
 import com.snapandpack.dto.AuthDtos.LoginRequest;
 import com.snapandpack.dto.AuthDtos.RegisterRequest;
 import com.snapandpack.exception.ApiException;
+import com.snapandpack.exception.MfaRequiredException;
 import com.snapandpack.model.Role;
 import com.snapandpack.model.User;
 import com.snapandpack.repository.UserRepository;
@@ -33,30 +34,40 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokens;
     private final AuditService audit;
+    private final MfaService mfa;
+    private final EmailVerificationService emailVerification;
     /** Checked when the email is unknown, so a wrong email takes as long to answer as a wrong password. */
     private final String dummyHash;
 
     /** Receives the services this class needs and prepares the stand-in hash for unknown emails. */
     public AuthService(UserRepository users, UserService userService, PasswordEncoder passwordEncoder,
-                       TokenService tokens, AuditService audit) {
+                       TokenService tokens, AuditService audit, MfaService mfa,
+                       EmailVerificationService emailVerification) {
         this.users = users;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.tokens = tokens;
         this.audit = audit;
+        this.mfa = mfa;
+        this.emailVerification = emailVerification;
         this.dummyHash = passwordEncoder.encode("not-a-real-password");
     }
 
-    /** Creates a customer account and signs it in. Staff accounts can only be created by the super admin. */
+    /**
+     * Creates a customer account, sends the link for confirming its email address and signs it in.
+     * Staff accounts can only be created by the super admin.
+     */
     @Transactional
-    public SignIn register(RegisterRequest request) {
-        User user = userService.createAccount(request.name(), request.email(), request.password(), Role.CUSTOMER);
+    public SignIn register(RegisterRequest request, String siteUrl) {
+        User user = userService.createAccount(request.name(), request.email(), request.password(), Role.CUSTOMER, false);
         audit.record(user, "ACCOUNT_REGISTERED", "Customer account created");
+        emailVerification.send(user, siteUrl);
         return new SignIn(user, tokens.issue(user));
     }
 
     /**
-     * Checks the email and password and returns a sign-in token.
+     * Checks the email and password, and the authenticator code for accounts that use one,
+     * and returns a sign-in token.
      * After five wrong passwords in a row the account is locked for 15 minutes.
      * Every attempt, good or bad, is written to the activity record, and the failed-attempt
      * count is saved even though the request ends in an error.
@@ -87,6 +98,17 @@ public class AuthService {
             throw new ApiException(HttpStatus.FORBIDDEN, "This account has been deactivated");
         }
 
+        // Second step, for accounts with two-step sign-in: a code from the authenticator app.
+        if (user.isMfaEnabled()) {
+            if (request.code() == null || request.code().isBlank()) {
+                throw new MfaRequiredException();
+            }
+            if (!mfa.verifyAtSignIn(user, request.code())) {
+                countFailedLogin(user, now);
+                throw new ApiException(HttpStatus.UNAUTHORIZED, "That code is not right. Use the newest code in your app.");
+            }
+        }
+
         // Passwords saved with the older hashing method are re-saved with the current one at sign-in.
         if (passwordEncoder.upgradeEncoding(user.getPasswordHash())) {
             user.setPasswordHash(passwordEncoder.encode(request.password()));
@@ -106,7 +128,7 @@ public class AuthService {
         });
     }
 
-    /** Adds one to the wrong-password count and locks the account when the limit is reached. */
+    /** Adds one to the count of wrong passwords and codes, and locks the account when the limit is reached. */
     private void countFailedLogin(User user, LocalDateTime now) {
         int failed = user.getFailedLogins() + 1;
         if (failed >= MAX_FAILED_LOGINS) {
@@ -116,7 +138,7 @@ public class AuthService {
                     + MAX_FAILED_LOGINS + " wrong passwords");
         } else {
             user.setFailedLogins(failed);
-            audit.record(user, "LOGIN_FAILED", "Wrong password (" + failed + " of " + MAX_FAILED_LOGINS + ")");
+            audit.record(user, "LOGIN_FAILED", "Wrong password or code (" + failed + " of " + MAX_FAILED_LOGINS + ")");
         }
     }
 

@@ -50,6 +50,22 @@ public class User {
     @Column(name = "password_changed_at")
     private LocalDateTime passwordChangedAt;
 
+    /** True once the user has opened the confirmation link sent to their email address. */
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified;
+
+    /** True when sign-in also asks for a code from the user's authenticator app. */
+    @Column(name = "mfa_enabled", nullable = false)
+    private boolean mfaEnabled;
+
+    /** The authenticator secret, encrypted. Null when two-step sign-in has never been set up. */
+    @Column(name = "mfa_secret")
+    private String mfaSecret;
+
+    /** The time step of the last code accepted, so the same code cannot be used twice. */
+    @Column(name = "mfa_last_step")
+    private Long mfaLastStep;
+
     /** Set when the user signs out (UTC). Sign-in tokens issued before this stop working. */
     @Column(name = "sessions_valid_after")
     private LocalDateTime sessionsValidAfter;
@@ -90,6 +106,18 @@ public class User {
 
     public LocalDateTime getPasswordChangedAt() { return passwordChangedAt; }
     public void setPasswordChangedAt(LocalDateTime passwordChangedAt) { this.passwordChangedAt = passwordChangedAt; }
+
+    public boolean isEmailVerified() { return emailVerified; }
+    public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
+
+    public boolean isMfaEnabled() { return mfaEnabled; }
+    public void setMfaEnabled(boolean mfaEnabled) { this.mfaEnabled = mfaEnabled; }
+
+    public String getMfaSecret() { return mfaSecret; }
+    public void setMfaSecret(String mfaSecret) { this.mfaSecret = mfaSecret; }
+
+    public Long getMfaLastStep() { return mfaLastStep; }
+    public void setMfaLastStep(Long mfaLastStep) { this.mfaLastStep = mfaLastStep; }
 
     public LocalDateTime getSessionsValidAfter() { return sessionsValidAfter; }
     public void setSessionsValidAfter(LocalDateTime sessionsValidAfter) { this.sessionsValidAfter = sessionsValidAfter; }

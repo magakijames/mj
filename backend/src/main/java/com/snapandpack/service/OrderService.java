@@ -17,6 +17,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,13 +31,17 @@ public class OrderService {
     private final UserRepository users;
     private final AuditService audit;
     private final NotificationService notifications;
+    /** When true, an account must confirm its email address before it can place an order. */
+    private final boolean emailVerificationRequired;
 
     /** Stock at or below this number after a sale triggers a "low stock" notice to staff. */
     private static final int LOW_STOCK = 5;
 
     /** Receives the database access this class needs, the activity record and notifications. */
     public OrderService(OrderRepository orders, ProductRepository products, UserRepository users, AuditService audit,
-                        NotificationService notifications) {
+                        NotificationService notifications,
+                        @Value("${app.email-verification.required}") boolean emailVerificationRequired) {
+        this.emailVerificationRequired = emailVerificationRequired;
         this.orders = orders;
         this.products = products;
         this.users = users;
@@ -50,6 +56,9 @@ public class OrderService {
     @Transactional
     public OrderResponse place(Long userId, CreateOrderRequest request) {
         User user = users.findById(userId).orElseThrow(() -> ApiException.notFound("Account not found"));
+        if (emailVerificationRequired && !user.isEmailVerified()) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Confirm your email address before placing an order. Use the link we sent you, or ask for a new one.");
+        }
 
         CustomerOrder order = new CustomerOrder();
         order.setUser(user);

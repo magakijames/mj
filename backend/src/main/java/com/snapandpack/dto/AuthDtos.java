@@ -21,7 +21,14 @@ public final class AuthDtos {
     /** What the sign-in form sends. */
     public record LoginRequest(
             @NotBlank(message = "Enter your email") String email,
-            @NotBlank(message = "Enter your password") String password) {
+            @NotBlank(message = "Enter your password") String password,
+            /** The authenticator or recovery code. Only needed for accounts with two-step sign-in. */
+            @Size(max = 20) String code) {
+    }
+
+    /** What the "confirm your email" page sends: the code from the link. */
+    public record VerifyEmailRequest(
+            @NotBlank(message = "This confirmation link is not valid") @Size(max = 200) String token) {
     }
 
 

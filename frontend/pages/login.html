@@ -20,6 +20,8 @@
       <form id="loginForm" class="form">
         <label>Email <input id="email" type="email" autocomplete="email" required></label>
         <label>Password <input id="password" type="password" autocomplete="current-password" required></label>
+        <label id="codeField" hidden>Sign-in code <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="20">
+          <small>The 6-digit code from your authenticator app, or one of your recovery codes.</small></label>
         <p class="err" id="formError" role="alert"></p>
         <button class="btn">Sign in</button>
       </form>

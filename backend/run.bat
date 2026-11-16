@@ -64,7 +64,7 @@ call :check "Login failed" "SQL Server did not accept that login name or passwor
 call :check "The TCP/IP connection to the host" "SQL Server is not reachable on localhost port 1433. Start SQL Server and enable TCP/IP for it in SQL Server Configuration Manager."
 call :check "Cannot open database" "The SnapAndPack database is missing, or this login may not open it. Run database\01_create_database.sql."
 call :check "Invalid object name" "A table is missing. As an administrator run, in order, any of database\02, 03 and 05 you have not run yet, then 04 again."
-call :check "Invalid column name" "The database is missing the newest columns. As an administrator run database\05_roles_payments_notifications.sql and then 04_app_login_permissions.sql again."
+call :check "Invalid column name" "The database is missing the newest columns. As an administrator run, in number order, the scripts in the database folder you have not run yet (the newest is 06)."
 call :check "permission was denied" "The database login lacks a permission it needs. Run database\04_app_login_permissions.sql again as an administrator."
 call :check "was already in use" "The port was taken by another program just as the server started. Run run.bat again."
 if not defined FOUND echo   - The cause is not one this script knows. Send the file backend\%LOG% to get it fixed.

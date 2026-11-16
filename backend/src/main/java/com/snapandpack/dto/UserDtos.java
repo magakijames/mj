@@ -2,6 +2,7 @@ package com.snapandpack.dto;
 
 import com.snapandpack.model.Role;
 import com.snapandpack.model.User;
+import com.snapandpack.security.MfaPolicy;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,12 +19,14 @@ public final class UserDtos {
 
     /** An account as the front end sees it. */
     public record UserResponse(Long id, String name, String email, Role role, boolean active, boolean locked,
+                               boolean emailVerified, boolean mfaEnabled, boolean mfaSetupRequired,
                                Instant createdAt) {
 
         /** Copies the safe fields of an account into a response. */
         public static UserResponse from(User user) {
             return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.isActive(),
-                    user.isLockedAt(LocalDateTime.now(ZoneOffset.UTC)), user.getCreatedAt().toInstant(ZoneOffset.UTC));
+                    user.isLockedAt(LocalDateTime.now(ZoneOffset.UTC)), user.isEmailVerified(), user.isMfaEnabled(),
+                    MfaPolicy.setupRequired(user), user.getCreatedAt().toInstant(ZoneOffset.UTC));
         }
     }
 

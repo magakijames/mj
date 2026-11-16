@@ -47,7 +47,10 @@ public class JwtUserConverter implements Converter<Jwt, AbstractAuthenticationTo
         if (issuedBefore(jwt, user.getPasswordChangedAt()) || issuedBefore(jwt, user.getSessionsValidAfter())) {
             throw new InvalidBearerTokenException("This sign-in has ended; sign in again");
         }
-        var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        // An administrator who has not set up two-step sign-in yet is signed in, but without their
+        // role, so every staff function refuses them until they finish setting it up.
+        String granted = MfaPolicy.setupRequired(user) ? "ROLE_MFA_SETUP_REQUIRED" : "ROLE_" + user.getRole().name();
+        var authorities = List.of(new SimpleGrantedAuthority(granted));
         return new JwtAuthenticationToken(jwt, authorities, String.valueOf(user.getId()));
     }
 

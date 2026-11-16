@@ -11,8 +11,9 @@ export const pageLabel = (page, user) => (page.key === 'users' && user.role !== 
 
 // Opens an admin page. Returns the signed-in staff member, or null after sending the visitor elsewhere.
 // The role is re-read from the server, so a change made by the admin shows up straight away.
-// Visitors who are not signed in go to the sign-in page; customers go to the store;
-// staff without access to this page go to the dashboard.
+// Visitors who are not signed in go to the sign-in page; customers go to the store; administrators
+// who have not set up two-step sign-in go to their Account page; staff without access to this page
+// go to the dashboard.
 export async function openAdminPage(pageKey) {
   if (!requireSignIn()) return null;
   let user;
@@ -26,6 +27,8 @@ export async function openAdminPage(pageKey) {
 
   const page = ADMIN_PAGES.find(p => p.key === pageKey);
   if (!isStaff(user)) { location.href = url('index.html'); return null; }
+  // Administrators must switch on two-step sign-in first; until then the server refuses their requests.
+  if (user.mfaSetupRequired) { location.href = url('pages/account.html'); return null; }
   if (!page.roles.includes(user.role)) { location.href = url('admin/index.html'); return null; }
 
   const settings = await loadSettings();
@@ -40,6 +43,7 @@ export async function openAdminPage(pageKey) {
       <div class="actions">
         <span class="who">${esc(user.name)} <span class="badge">${roleLabel(user.role)}</span></span>
         ${notificationLink()}
+        <a class="link" href="${url('pages/account.html')}">Account</a>
         <a class="link" href="${url('index.html')}">View store</a>
         <button class="link" id="signOutBtn">Sign out</button>
       </div>

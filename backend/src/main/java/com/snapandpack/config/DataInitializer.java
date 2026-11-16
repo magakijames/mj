@@ -62,7 +62,7 @@ public class DataInitializer implements ApplicationRunner {
         if (users.existsByRole(Role.SUPER_ADMIN)) {
             return;
         }
-        userService.createAccount(adminName, adminEmail, adminPassword, Role.SUPER_ADMIN);
+        userService.createAccount(adminName, adminEmail, adminPassword, Role.SUPER_ADMIN, true);
         log.info("Created the first super admin account: {}", adminEmail.trim().toLowerCase());
     }
 

@@ -52,10 +52,14 @@ function userRow(u) {
     ? `<select data-role="${u.id}" aria-label="Role for ${esc(u.name)}">${Object.entries(ROLES).map(([value, label]) =>
         `<option value="${value}" ${value === u.role ? 'selected' : ''}>${label}</option>`).join('')}</select>`
     : `<span class="badge">${roleLabel(u.role)}</span>`;
-  const status = !u.active ? '<span class="status cancelled">Deactivated</span>'
+  const status = (!u.active ? '<span class="status cancelled">Deactivated</span>'
     : u.locked ? '<span class="status pending">Locked</span>'
-    : '<span class="status delivered">Active</span>';
+    : '<span class="status delivered">Active</span>')
+    + (u.emailVerified ? '' : ' <span class="status pending">Email not confirmed</span>')
+    + (u.mfaEnabled ? ' <span class="status shipped">Two-step on</span>' : '');
   const actions = !isAdmin ? '' : `<td class="actions-cell">${self ? '<span class="meta">You</span>' : `<div class="btn-row">
+      ${u.emailVerified ? '' : `<button class="btn small ghost" data-verify="${u.id}">Confirm email</button>`}
+      ${u.mfaEnabled ? `<button class="btn small ghost" data-mfa-reset="${u.id}">Reset two-step</button>` : ''}
       ${u.active ? `<button class="btn small ghost" data-reset="${u.id}">Reset password</button>` : ''}
       <button class="btn small ${u.active ? 'danger' : 'ghost'}" data-active="${u.id}" data-to="${!u.active}">${u.active ? 'Deactivate' : 'Activate'}</button>
     </div>`}</td>`;
@@ -118,6 +122,32 @@ async function makeResetLink(id) {
   }
 }
 
+// Marks an account's email as confirmed by hand, for example while email is not connected.
+async function confirmEmail(id) {
+  const user = users.find(u => u.id === id);
+  if (!confirm(`Mark ${user.email} as confirmed? Only do this if you know the address belongs to them.`)) return;
+  try {
+    await api(`/users/${id}/verify-email`, { method: 'POST' });
+    toast('Email marked as confirmed');
+  } catch (error) {
+    toast(error.message);
+  }
+  load();
+}
+
+// Removes two-step sign-in from an account whose owner lost their phone and recovery codes.
+async function resetTwoStep(id) {
+  const user = users.find(u => u.id === id);
+  if (!confirm(`Remove two-step sign-in from ${user.name}'s account? They will have to set it up again.`)) return;
+  try {
+    await api(`/users/${id}/mfa-reset`, { method: 'POST' });
+    toast('Two-step sign-in removed');
+  } catch (error) {
+    toast(error.message);
+  }
+  load();
+}
+
 // Copies the reset link so the admin can paste it into a message.
 async function copyResetLink() {
   try {
@@ -139,6 +169,10 @@ document.addEventListener('click', e => {
   if (close) { close.closest('.modal').hidden = true; return; }
   const toggle = e.target.closest('[data-active]');
   if (toggle) return setActive(toggle.dataset.active, toggle.dataset.to === 'true');
+  const verify = e.target.closest('[data-verify]');
+  if (verify) return confirmEmail(+verify.dataset.verify);
+  const mfaReset = e.target.closest('[data-mfa-reset]');
+  if (mfaReset) return resetTwoStep(+mfaReset.dataset.mfaReset);
   const reset = e.target.closest('[data-reset]');
   if (reset) makeResetLink(+reset.dataset.reset);
 });

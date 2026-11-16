@@ -1,6 +1,7 @@
 -- Snap & Pack: database permissions. Run as an administrator, with the newest tables already created.
 -- It is safe to run again, and MUST be run again after any script that adds tables
 -- (after 03_security_and_settings.sql and again after 05_roles_payments_notifications.sql).
+-- Scripts from 06 onwards give the permissions for their own tables themselves.
 --
 -- It creates two database roles and puts the backend's login (clearance_app) in the first:
 --
@@ -73,6 +74,14 @@ IF OBJECT_ID('dbo.payments') IS NOT NULL
 -- Notifications: read, create, mark as seen.
 IF OBJECT_ID('dbo.notifications') IS NOT NULL
     GRANT SELECT, INSERT, UPDATE ON dbo.notifications TO shop_app_role;
+
+-- Email confirmation links: created, read, removed once used or replaced.
+IF OBJECT_ID('dbo.email_verification_tokens') IS NOT NULL
+    GRANT SELECT, INSERT, DELETE ON dbo.email_verification_tokens TO shop_app_role;
+
+-- Recovery codes for two-step sign-in: created, read, marked as used, removed when reset.
+IF OBJECT_ID('dbo.mfa_recovery_codes') IS NOT NULL
+    GRANT SELECT, INSERT, UPDATE, DELETE ON dbo.mfa_recovery_codes TO shop_app_role;
 GO
 
 -- ---- what a reporting login may do ----

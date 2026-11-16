@@ -66,7 +66,8 @@ public class RequestGuardFilter extends OncePerRequestFilter {
     /** True for the addresses someone guessing passwords would hammer. */
     private static boolean isAuthAddress(String uri) {
         return uri.equals("/api/auth/login") || uri.equals("/api/auth/register")
-                || uri.equals("/api/auth/forgot-password") || uri.equals("/api/auth/reset-password");
+                || uri.equals("/api/auth/forgot-password") || uri.equals("/api/auth/reset-password")
+                || uri.equals("/api/auth/verify-email") || uri.startsWith("/api/auth/mfa/");
     }
 
     /** Counts one request against a key and reports whether the key has now gone past its limit for this minute. */

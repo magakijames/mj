@@ -102,3 +102,18 @@ a.btn{display:inline-block;text-align:center}
   #siteHeader .link{padding:6px 8px;font-size:13px}
   .notif{flex-direction:column;gap:6px}
 }
+
+/* ---- account page, email confirmation, two-step sign-in ---- */
+.verify-bar{background:#f6ecd9;color:#5c4417;border-bottom:1px solid #e6d3a8;padding:10px 4%;font-size:14px;text-align:center}
+.verify-bar .link{color:#5c4417;text-decoration:underline;padding:2px 6px}
+.note.ok{border-left-color:#1f6b3a}
+.account .panel{margin-bottom:18px;max-width:760px}
+.account .panel h2{font-size:20px;margin:0 0 12px}
+.narrow-form{max-width:340px}
+.steps{padding-left:20px;line-height:1.7}
+.steps li{margin-bottom:8px}
+.qr{border:1px solid var(--line);border-radius:6px;margin:8px 0;background:#fff}
+code{font-family:ui-monospace,Consolas,monospace;background:#f3f4f2;border:1px solid var(--line);border-radius:4px;padding:2px 6px;font-size:14px}
+.codes{list-style:none;padding:0;margin:12px 0 0;display:grid;grid-template-columns:repeat(4,max-content);gap:8px 18px;font:600 15px ui-monospace,Consolas,monospace}
+details summary{cursor:pointer;font-weight:600;margin-bottom:12px}
+@media(max-width:860px){.codes{grid-template-columns:repeat(2,max-content)}}

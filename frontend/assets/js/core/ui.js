@@ -1,6 +1,6 @@
 // Small helpers used on every page, plus the shared header and footer.
 import { url, ROLES, API_ORIGIN } from './config.js';
-import { getUser, isStaff, signOut } from './auth.js';
+import { getUser, setAuth, isStaff, signOut } from './auth.js';
 import { cartCount } from './cart-store.js';
 import { loadSettings } from './settings.js';
 import { notificationLink, watchNotifications } from './notifications.js';
@@ -60,6 +60,29 @@ export function applyShopName(settings) {
   document.title = document.title.replace('Snap & Pack', settings.shop_name);
 }
 
+// Shows a strip under the header asking the user to confirm their email address, with a button to
+// send the link again. It first asks the server for the current state, because the link may have
+// been opened in another browser since this one last checked.
+async function showEmailBanner() {
+  let user;
+  try {
+    const { api } = await import('./api.js');
+    user = await api('/auth/me');
+    setAuth(user);
+    if (user.emailVerified) return;
+    $('#siteHeader').insertAdjacentHTML('afterend', `<div class="verify-bar" id="verifyBar">
+      Please confirm your email address before placing an order. Open the link we sent to <b>${esc(user.email)}</b>.
+      <button class="link" id="resendVerify">Send the link again</button></div>`);
+    $('#resendVerify').addEventListener('click', async () => {
+      try {
+        toast((await api('/auth/resend-verification', { method: 'POST' })).message);
+      } catch (error) {
+        toast(error.message);
+      }
+    });
+  } catch { /* not signed in any more: nothing to show */ }
+}
+
 // Draws the top bar, header and footer of the store pages using the site settings, and returns
 // those settings. The top bar and header stay pinned to the top of the screen while the page scrolls. Pass { search: true } on the home page to include the search box.
 export async function mountStoreChrome({ search = false } = {}) {
@@ -72,6 +95,7 @@ export async function mountStoreChrome({ search = false } = {}) {
   if (user && isStaff(user)) links.push(`<a class="link" href="${url('admin/index.html')}">Admin panel</a>`);
   if (user) links.push(`<a class="link" href="${url('pages/orders.html')}">My orders</a>`);
   if (user) links.push(notificationLink());
+  if (user) links.push(`<a class="link" href="${url('pages/account.html')}">Account</a>`);
   if (user) links.push(`<button class="link" id="signOutBtn">Sign out (${esc(user.name.split(' ')[0])})</button>`);
   links.push(`<a class="link" href="${url('pages/cart.html')}">Cart (<span id="cartCount">${cartCount()}</span>)</a>`);
 
@@ -94,6 +118,7 @@ export async function mountStoreChrome({ search = false } = {}) {
     </footer>`;
 
   $('#signOutBtn')?.addEventListener('click', signOut);
+  if (user && !user.emailVerified) showEmailBanner();
   watchNotifications(count => toast(count === 1 ? 'You have a new notification' : `You have ${count} new notifications`));
   return settings;
 }

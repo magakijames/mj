@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Account – Snap &amp; Pack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/store.css">
+</head>
+<body>
+  <div id="siteHeader"></div>
+
+  <main class="wrap account">
+    <div class="page-head">
+      <h1 class="page-title">Account</h1>
+      <a class="btn" id="adminLink" hidden>Go to the admin area</a>
+    </div>
+
+    <section class="panel">
+      <h2>Your details</h2>
+      <div id="details"><p class="empty">Loading…</p></div>
+    </section>
+
+    <section class="panel">
+      <h2>Two-step sign-in</h2>
+      <p>After your password, signing in also asks for a 6-digit code from an authenticator app on your phone
+        (Google Authenticator, Microsoft Authenticator, Authy and others). Someone who learns your password still cannot sign in.</p>
+      <p class="note" id="mfaRequiredNote" hidden>Administrators must switch this on before they can use the admin area.</p>
+
+      <div id="mfaOff" hidden>
+        <p><span class="status pending">Off</span></p>
+        <form id="mfaStart" class="form narrow-form">
+          <label>Your password <input id="mfaPassword" type="password" autocomplete="current-password" required></label>
+          <p class="err" id="mfaStartError" role="alert"></p>
+          <button class="btn">Set up two-step sign-in</button>
+        </form>
+      </div>
+
+      <div id="mfaScan" hidden>
+        <ol class="steps">
+          <li>Open your authenticator app and choose to add an account.</li>
+          <li>Scan this code:<br><img id="mfaQr" class="qr" alt="QR code for your authenticator app" width="200" height="200">
+            <br>Cannot scan it? Type this key into the app instead: <code id="mfaSecret"></code></li>
+          <li>Type the 6-digit code the app now shows.</li>
+        </ol>
+        <form id="mfaConfirm" class="form narrow-form">
+          <label>Code from the app <input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="7" required></label>
+          <p class="err" id="mfaConfirmError" role="alert"></p>
+          <button class="btn">Switch on</button>
+        </form>
+      </div>
+
+      <div id="mfaCodes" class="note" hidden>
+        <b>Save these recovery codes now.</b> They are shown only this once. Each one can be used a single time
+        in place of an app code, if you lose your phone. Keep them somewhere safe, not on the same phone.
+        <ul class="codes" id="recoveryList"></ul>
+      </div>
+
+      <div id="mfaOn" hidden>
+        <p><span class="status delivered">On</span></p>
+        <details>
+          <summary>Switch two-step sign-in off</summary>
+          <form id="mfaDisable" class="form narrow-form">
+            <label>Your password <input id="offPassword" type="password" autocomplete="current-password" required></label>
+            <label>Code from the app, or a recovery code <input id="offCode" maxlength="20" required></label>
+            <p class="err" id="mfaDisableError" role="alert"></p>
+            <button class="btn danger">Switch off</button>
+          </form>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <div id="siteFooter"></div>
+  <script type="module" src="../assets/js/pages/account.js"></script>
+</body>
+</html>

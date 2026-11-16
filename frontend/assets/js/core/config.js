@@ -119,4 +119,7 @@ export const ACTIVITY_LABELS = {
   LOGIN_LOCKED: 'Sign-in locked', LOGOUT: 'Signed out',
   PAYMENT_REQUESTED: 'Payment requested', PAYMENT_RECEIVED: 'Payment received', PAYMENT_FAILED: 'Payment failed',
   PAYMENT_MISMATCH: 'Payment amount mismatch', PAYMENT_DUPLICATE: 'Order paid twice',
+  EMAIL_VERIFIED: 'Email confirmed', EMAIL_VERIFIED_BY_ADMIN: 'Email confirmed by admin',
+  MFA_ENABLED: 'Two-step sign-in switched on', MFA_DISABLED: 'Two-step sign-in switched off',
+  MFA_RESET: 'Two-step sign-in reset by admin', MFA_RECOVERY_CODE_USED: 'Recovery code used',
 };

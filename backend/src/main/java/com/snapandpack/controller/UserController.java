@@ -7,6 +7,8 @@ import com.snapandpack.dto.UserDtos.UpdateRoleRequest;
 import com.snapandpack.dto.UserDtos.UserResponse;
 import com.snapandpack.security.Access;
 import com.snapandpack.security.CurrentUser;
+import com.snapandpack.service.EmailVerificationService;
+import com.snapandpack.service.MfaService;
 import com.snapandpack.service.PasswordResetService;
 import com.snapandpack.service.UserService;
 import com.snapandpack.web.SiteUrl;
@@ -32,9 +34,14 @@ public class UserController {
     private final UserService userService;
     private final PasswordResetService passwordResetService;
     private final SiteUrl siteUrl;
+    private final MfaService mfaService;
+    private final EmailVerificationService emailVerificationService;
 
     /** Receives the services this controller passes requests to. */
-    public UserController(UserService userService, PasswordResetService passwordResetService, SiteUrl siteUrl) {
+    public UserController(UserService userService, PasswordResetService passwordResetService, SiteUrl siteUrl,
+                          MfaService mfaService, EmailVerificationService emailVerificationService) {
+        this.mfaService = mfaService;
+        this.emailVerificationService = emailVerificationService;
         this.userService = userService;
         this.passwordResetService = passwordResetService;
         this.siteUrl = siteUrl;
@@ -76,5 +83,21 @@ public class UserController {
     @PreAuthorize(Access.SUPER_ADMIN)
     public ResetLinkResponse createResetLink(@PathVariable Long id) {
         return passwordResetService.createLinkForUser(id, siteUrl.current());
+    }
+
+    /** POST /api/users/{id}/mfa-reset: removes two-step sign-in from another account (lost phone). Super admin only. */
+    @PostMapping("/{id}/mfa-reset")
+    @PreAuthorize(Access.SUPER_ADMIN)
+    public UserResponse resetMfa(Authentication authentication, @PathVariable Long id) {
+        mfaService.resetFor(CurrentUser.id(authentication), id);
+        return userService.get(id);
+    }
+
+    /** POST /api/users/{id}/verify-email: marks an account's email as confirmed by hand. Super admin only. */
+    @PostMapping("/{id}/verify-email")
+    @PreAuthorize(Access.SUPER_ADMIN)
+    public UserResponse markEmailVerified(@PathVariable Long id) {
+        emailVerificationService.markVerified(id);
+        return userService.get(id);
     }
 }

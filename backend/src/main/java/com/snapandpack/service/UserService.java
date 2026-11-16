@@ -51,7 +51,8 @@ public class UserService {
     /** Lets the admin create an account with any role, and records it. */
     @Transactional
     public UserResponse create(CreateUserRequest request) {
-        User user = createAccount(request.name(), request.email(), request.password(), request.role());
+        // An account made by the super admin is trusted: its email counts as confirmed.
+        User user = createAccount(request.name(), request.email(), request.password(), request.role(), true);
         audit.record("USER_CREATED", user.getEmail() + " created as " + user.getRole());
         return UserResponse.from(user);
     }
@@ -59,9 +60,10 @@ public class UserService {
     /**
      * Saves a new account. Checks the password rules, stores the email in lower case,
      * refuses an email that is already taken and stores only a hash of the password.
+     * emailVerified says whether the address is already trusted or still has to be confirmed.
      */
     @Transactional
-    public User createAccount(String name, String email, String password, Role role) {
+    public User createAccount(String name, String email, String password, Role role, boolean emailVerified) {
         PasswordPolicy.check(password);
         String cleanEmail = email.trim().toLowerCase();
         if (users.existsByEmailIgnoreCase(cleanEmail)) {
@@ -73,6 +75,7 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setRole(role);
         user.setActive(true);
+        user.setEmailVerified(emailVerified);
         user.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
         return users.save(user);
     }

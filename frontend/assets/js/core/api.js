@@ -44,7 +44,11 @@ export async function api(path, { method = 'GET', body, form, anonymous = false 
   const data = response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok) {
     const fallback = { 401: 'Please sign in first.', 403: 'You do not have permission to do that.', 404: 'Not found.', 429: 'Too many requests. Wait a minute and try again.' }[response.status];
-    throw new Error((data && data.message) || fallback || 'Something went wrong. Please try again.');
+    const error = new Error((data && data.message) || fallback || 'Something went wrong. Please try again.');
+    // The server's full answer, for the few callers that need more than the message
+    // (the sign-in page looks for mfaRequired).
+    error.data = data || {};
+    throw error;
   }
   return data;
 }

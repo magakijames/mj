@@ -18,9 +18,10 @@ In SQL Server Management Studio, connected as an administrator, run these in ord
 | `database/02_schema.sql` | Creates the main tables. Select the `SnapAndPack` database first. |
 | `database/03_security_and_settings.sql` | Adds sign-in protection, password reset links, editable site text, the activity record and extra data rules. |
 | `database/05_roles_payments_notifications.sql` | Adds the new staff roles, room for Argon2id password hashes, sign-out support, M-Pesa payments and notifications. |
-| `database/04_app_login_permissions.sql` | Run last, and again after any script that adds tables. Gives the backend's login (`clearance_app`) only the rights it needs, through a database role. Edit the login name inside the script if yours is different. |
+| `database/06_mfa_and_email_confirmation.sql` | Adds two-step sign-in and email confirmation. It gives the website's login its permissions on the new tables itself. |
+| `database/04_app_login_permissions.sql` | Run after 05, and again if you add tables by hand. Gives the backend's login (`clearance_app`) only the rights it needs, through a database role. Edit the login name inside the script if yours is different. |
 
-Select the `SnapAndPack` database before running 02, 03 and 05.
+Select the `SnapAndPack` database before running 02, 03, 05 and 06. On a new database the order is 01, 02, 03, 05, 04, 06.
 
 **Upgrading a database that is already running:** run only the scripts you have not run yet, in number
 order, and then `04` again. Your products, accounts and orders are kept. Script 05 renames the old
@@ -106,6 +107,41 @@ Messages to customers also go out through every outside channel that is switched
 | SMS | Placeholder only | Steps at the top of `SmsNotifier.java` |
 | WhatsApp | Placeholder only | Steps at the top of `WhatsAppNotifier.java` |
 
+## Two-step sign-in (MFA)
+
+After the password, sign-in asks for a 6-digit code from an authenticator app on the user's phone
+(Google Authenticator, Microsoft Authenticator, Authy and others).
+
+- **Who:** anyone can switch it on from their **Account** page. Super admins and admins must: until
+  they do, they can sign in but every staff function refuses them and the admin area sends them to
+  the Account page. Set `MFA_REQUIRED_FOR_ADMINS=false` to switch that rule off while testing.
+- **Setting up:** Account page, enter your password, scan the QR code with the app (or type the key),
+  then type the code the app shows.
+- **Recovery codes:** eight one-time codes are shown once, when it is switched on. Each can be used in
+  place of an app code if the phone is lost. Keep them somewhere safe.
+- **Lost phone and no recovery codes:** the super admin can press "Reset two-step" on that person's
+  row on the Users page. For the super admin's own account, an administrator of the database runs:
+
+  ```sql
+  UPDATE users SET mfa_enabled = 0, mfa_secret = NULL, mfa_last_step = NULL WHERE email = 'their@email';
+  DELETE FROM mfa_recovery_codes WHERE user_id = (SELECT id FROM users WHERE email = 'their@email');
+  ```
+
+The authenticator secrets are stored encrypted. Set `MFA_ENCRYPTION_KEY` before going live and keep it
+safe: if it changes, everyone has to set up two-step sign-in again.
+
+## Confirming email addresses
+
+A new customer is sent a link to confirm their email address. Until they open it they can browse and
+sign in but cannot place an order, and a strip under the header reminds them, with a button to send
+the link again. A link works for 24 hours.
+
+- **Until email is connected**, the link is written to the server log (`backend/logs/server.log`),
+  and the super admin can press "Confirm email" on the customer's row on the Users page.
+- Accounts that existed before this feature, and staff accounts created by the super admin, count as
+  confirmed.
+- Set `EMAIL_VERIFICATION_REQUIRED=false` to let unconfirmed accounts order while testing.
+
 ## Payments (M-Pesa)
 
 After placing an order the customer pays from **My orders** with "Pay with M-Pesa".
@@ -153,7 +189,8 @@ off, and what has to be done when the site is deployed.
 ```
 frontend/
   index.html                 Store home page
-  pages/                     login, register, forgot-password, reset-password, cart (with checkout), orders, notifications
+  pages/                     login, register, verify-email, forgot-password, reset-password, account,
+                             cart (with checkout), orders, notifications
   admin/                     index (dashboard), products, orders, users, settings, activity
   assets/
     css/                     base.css (shared), store.css, admin.css
@@ -182,8 +219,9 @@ database/
   01_create_database.sql
   02_schema.sql
   03_security_and_settings.sql
-  04_app_login_permissions.sql      (run last, and again after 05)
+  04_app_login_permissions.sql      (run after 05)
   05_roles_payments_notifications.sql
+  06_mfa_and_email_confirmation.sql
 
 uploads/                     product photos uploaded by staff (created on first upload)
 ```
@@ -195,6 +233,9 @@ uploads/                     product photos uploaded by staff (created on first 
 | `POST /api/auth/register` | anyone | Create a customer account |
 | `POST /api/auth/login` | anyone | Sign in |
 | `POST /api/auth/logout` | signed in | Sign out |
+| `POST /api/auth/verify-email` | anyone with a link | Confirm an email address |
+| `POST /api/auth/resend-verification` | signed in | Send the confirmation link again |
+| `POST /api/auth/mfa/setup`, `/mfa/enable`, `/mfa/disable` | signed in | Set up, switch on and switch off two-step sign-in |
 | `GET /api/auth/me` | signed in | Current user and role |
 | `POST /api/auth/forgot-password` | anyone | Create a password reset link |
 | `POST /api/auth/reset-password` | anyone with a link | Set a new password |
@@ -214,6 +255,8 @@ uploads/                     product photos uploaded by staff (created on first 
 | `POST /api/users` | Super admin | Create an account with any role |
 | `PATCH /api/users/{id}/role`, `PATCH /api/users/{id}/active` | Super admin | Change role, switch on or off |
 | `POST /api/users/{id}/password-reset` | Super admin | Make a reset link for an account |
+| `POST /api/users/{id}/mfa-reset` | Super admin | Remove two-step sign-in from an account |
+| `POST /api/users/{id}/verify-email` | Super admin | Mark an email as confirmed by hand |
 | `GET /api/settings` | anyone | Shop name and site text |
 | `PUT /api/settings` | Super admin | Change site text |
 | `GET /api/audit` | Super admin | Activity record |
@@ -225,6 +268,5 @@ See `SECURITY.md` for the full list. The main gaps:
 
 - Real M-Pesa and email have code but have not been run against Safaricom or a mail server.
 - SMS and WhatsApp are placeholders.
-- A second sign-in step (MFA) for administrators, and confirming a new account's email address.
 - Refunds, and managing product categories from the admin area (categories are fixed as Bag and Cap).
 - Changing your own password while signed in (use "Forgot your password?" for now).
