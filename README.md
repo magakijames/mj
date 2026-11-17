@@ -33,7 +33,7 @@ The backend connects with SQL Server authentication (a login name and password),
 
 You need JDK 21 or newer. Nothing else: Maven is downloaded for you the first time.
 
-**On Windows, with the batch files** (in the `backend` folder):
+**On Windows** (in the `backend` folder):
 
 - `build.bat` builds the backend. Run it again whenever you change the Java code.
 - `run.bat` starts it. It asks for your SQL Server login name and password, and builds first if needed.
@@ -42,6 +42,20 @@ You need JDK 21 or newer. Nothing else: Maven is downloaded for you the first ti
 - `run.bat h2` starts it on a temporary in-memory database, without SQL Server.
 
 Double-click them, or run them from a Command Prompt. Stop the server with Ctrl+C.
+
+**On Linux (Kali, Ubuntu, Debian and others)**, in a terminal in the `backend` folder:
+
+```bash
+sudo apt install openjdk-21-jdk   # once, if Java 21 is not installed
+chmod +x build.sh run.sh          # once, if the files lost their "executable" mark when unzipped
+./build.sh                        # build; run again after changing Java code
+./run.sh                          # start with SQL Server (asks for the login; the password is hidden)
+./run.sh h2                       # start without SQL Server, on a temporary database
+```
+
+They do the same as the Windows files. If SQL Server is on another computer, set its address first:
+`export DB_URL="jdbc:sqlserver://192.168.1.20:1433;databaseName=SnapAndPack;encrypt=true;trustServerCertificate=true"`.
+You can also set `DB_USERNAME` and `DB_PASSWORD` the same way so `run.sh` does not ask.
 
 **From an IDE:**
 
