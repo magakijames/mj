@@ -13,7 +13,8 @@ import org.springframework.stereotype.Component;
  * The cookie that keeps a user signed in. It holds the signed token and is:
  *   HttpOnly  - page scripts cannot read it, so a script injected into a page cannot steal the sign-in
  *   SameSite  - the browser does not send it on requests started by other websites
- *   Secure    - sent over HTTPS only (switched on with app.cookies.secure=true once the site has HTTPS)
+ *   Secure    - sent over HTTPS only. Switched on by itself whenever the visitor came in over HTTPS
+ *               (for example through ngrok), and always with app.cookies.secure=true
  */
 @Component
 public class SessionCookie {
@@ -30,13 +31,13 @@ public class SessionCookie {
     }
 
     /** Adds the sign-in cookie to a response, after a successful sign-in or registration. */
-    public void write(HttpServletResponse response, String token) {
-        response.addHeader(HttpHeaders.SET_COOKIE, build(token, lifetime).toString());
+    public void write(HttpServletRequest request, HttpServletResponse response, String token) {
+        response.addHeader(HttpHeaders.SET_COOKIE, build(token, lifetime, secure || request.isSecure()).toString());
     }
 
     /** Tells the browser to delete the sign-in cookie, when signing out. */
-    public void clear(HttpServletResponse response) {
-        response.addHeader(HttpHeaders.SET_COOKIE, build("", Duration.ZERO).toString());
+    public void clear(HttpServletRequest request, HttpServletResponse response) {
+        response.addHeader(HttpHeaders.SET_COOKIE, build("", Duration.ZERO, secure || request.isSecure()).toString());
     }
 
     /** Reads the token from the request's sign-in cookie, or null when there is none. */
@@ -53,10 +54,10 @@ public class SessionCookie {
     }
 
     /** Builds the cookie with its protective settings. Only /api requests carry it. */
-    private ResponseCookie build(String value, Duration maxAge) {
+    private static ResponseCookie build(String value, Duration maxAge, boolean httpsOnly) {
         return ResponseCookie.from(NAME, value)
                 .httpOnly(true)
-                .secure(secure)
+                .secure(httpsOnly)
                 .sameSite("Strict")
                 .path("/api")
                 .maxAge(maxAge)

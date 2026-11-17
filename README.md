@@ -156,6 +156,16 @@ the link again. A link works for 24 hours.
   confirmed.
 - Set `EMAIL_VERIFICATION_REQUIRED=false` to let unconfirmed accounts order while testing.
 
+## Opening the shop through ngrok
+
+`ngrok http 8080` (use the port `run.sh` printed) gives the shop a public https address, useful for
+trying it on a phone or for M-Pesa callbacks. Nothing needs setting: the backend recognises that the
+request came in over https through ngrok, so sign-in works and the sign-in cookie is sent over https
+only. It trusts that information only from programs on the same computer.
+
+The free ngrok plan shows a warning page on the first visit; press "Visit Site". For M-Pesa, put the
+https address ngrok prints into `PUBLIC_URL`.
+
 ## Payments (M-Pesa)
 
 After placing an order the customer pays from **My orders** with "Pay with M-Pesa".

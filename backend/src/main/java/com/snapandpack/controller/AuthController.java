@@ -21,6 +21,7 @@ import com.snapandpack.service.MfaService;
 import com.snapandpack.service.PasswordResetService;
 import com.snapandpack.service.UserService;
 import com.snapandpack.web.SiteUrl;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -61,21 +62,23 @@ public class AuthController {
     /** POST /api/auth/register: creates a customer account and signs it in. Open to everyone. */
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse register(@Valid @RequestBody RegisterRequest request, HttpServletResponse response) {
-        return signIn(authService.register(request, siteUrl.current()), response);
+    public UserResponse register(@Valid @RequestBody RegisterRequest request, HttpServletRequest http,
+                                 HttpServletResponse response) {
+        return signIn(authService.register(request, siteUrl.current()), http, response);
     }
 
     /** POST /api/auth/login: checks email and password and signs the user in. Open to everyone. */
     @PostMapping("/login")
-    public UserResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
-        return signIn(authService.login(request), response);
+    public UserResponse login(@Valid @RequestBody LoginRequest request, HttpServletRequest http,
+                              HttpServletResponse response) {
+        return signIn(authService.login(request), http, response);
     }
 
     /** POST /api/auth/logout: ends the user's sign-ins and removes the sign-in cookie. */
     @PostMapping("/logout")
-    public MessageResponse logout(Authentication authentication, HttpServletResponse response) {
+    public MessageResponse logout(Authentication authentication, HttpServletRequest http, HttpServletResponse response) {
         authService.logout(CurrentUser.id(authentication));
-        sessionCookie.clear(response);
+        sessionCookie.clear(http, response);
         return new MessageResponse("Signed out");
     }
 
@@ -135,8 +138,8 @@ public class AuthController {
     }
 
     /** Puts the sign-in token into its protected cookie and returns the user's details for the page to show. */
-    private UserResponse signIn(SignIn signIn, HttpServletResponse response) {
-        sessionCookie.write(response, signIn.token());
+    private UserResponse signIn(SignIn signIn, HttpServletRequest http, HttpServletResponse response) {
+        sessionCookie.write(http, response, signIn.token());
         return UserResponse.from(signIn.user());
     }
 }
