@@ -1,61 +1,74 @@
 package com.snapandpack.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.function.Supplier;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.csrf.CsrfException;
 import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
-import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
-import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * Protection against cross-site request forgery (another website making the user's browser send
- * a request to this one). The server hands the browser a random value in the XSRF-TOKEN cookie;
- * the site's own scripts copy it into the X-XSRF-TOKEN header of every request that changes something.
- * Another website cannot read that cookie, so it cannot produce the header, and its request is refused.
+ * a request to this one).
+ *
+ * The server keeps a random value in the XSRF-TOKEN cookie and also sends it in the X-XSRF-TOKEN
+ * header of every answer. The site's own scripts send it back in the X-XSRF-TOKEN header of every
+ * request that changes something, and the server checks the two match. Another website can neither
+ * read the cookie nor see the header, so it cannot produce a matching request.
+ *
+ * Sending the value in a header as well as the cookie means the page never has to read the cookie
+ * itself, which goes wrong when another program on the same computer has left a cookie with the same
+ * name, or when the browser keeps cookies from page scripts.
  */
 public final class CsrfSupport {
+
+    /** The header the value travels in, both ways. */
+    public static final String HEADER = "X-XSRF-TOKEN";
+
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     private CsrfSupport() {
     }
 
-    /** Accepts the value sent back in the X-XSRF-TOKEN header by the site's own scripts. */
-    public static class HeaderTokenHandler implements CsrfTokenRequestHandler {
+    /** Sends the current value in the X-XSRF-TOKEN header of every answer (and the cookie, when it is new). */
+    public static class TokenHeaderFilter extends OncePerRequestFilter {
 
-        private final CsrfTokenRequestHandler plain = new CsrfTokenRequestAttributeHandler();
-        private final CsrfTokenRequestHandler masked = new XorCsrfTokenRequestAttributeHandler();
-
-        /** Makes the token available to the rest of the request. */
-        @Override
-        public void handle(HttpServletRequest request, HttpServletResponse response, Supplier<CsrfToken> token) {
-            masked.handle(request, response, token);
-        }
-
-        /** Reads the token the request sent: from the header when present, otherwise from a form field. */
-        @Override
-        public String resolveCsrfTokenValue(HttpServletRequest request, CsrfToken token) {
-            boolean inHeader = StringUtils.hasText(request.getHeader(token.getHeaderName()));
-            return (inHeader ? plain : masked).resolveCsrfTokenValue(request, token);
-        }
-    }
-
-    /** Makes sure the XSRF-TOKEN cookie is sent on every response, so the site's scripts always have it. */
-    public static class CookieFilter extends OncePerRequestFilter {
-
-        /** Touches the token, which causes the cookie to be written, then lets the request continue. */
+        /** Reads the value for this request, which also writes the cookie when needed, and adds it to the answer. */
         @Override
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
                 throws ServletException, IOException {
             CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
             if (token != null) {
-                token.getToken();
+                response.setHeader(HEADER, token.getToken());
             }
             chain.doFilter(request, response);
+        }
+    }
+
+    /**
+     * Answers refused requests with a message the front end can show. A failed forgery check is
+     * marked with "csrf": true, so the page knows to fetch a fresh value and try once more.
+     */
+    public static class DeniedHandler implements AccessDeniedHandler {
+
+        /** Writes the 403 answer as JSON. */
+        @Override
+        public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException denied)
+                throws IOException {
+            Map<String, Object> body = denied instanceof CsrfException
+                    ? Map.of("message", "The page's security check did not match. Reload the page and try again.", "csrf", true)
+                    : Map.of("message", "You do not have permission to do that.");
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            JSON.writeValue(response.getOutputStream(), body);
         }
     }
 }

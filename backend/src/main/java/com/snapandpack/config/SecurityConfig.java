@@ -33,6 +33,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.web.cors.CorsConfiguration;
@@ -73,7 +74,8 @@ public class SecurityConfig {
                 // exempt because it comes from their servers, not from a browser with a signed-in user.
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .csrfTokenRequestHandler(new CsrfSupport.HeaderTokenHandler())
+                        // The value is compared as it is; it travels in a header, never inside a page.
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                         .ignoringRequestMatchers("/api/payments/mpesa/callback/**"))
                 .cors(Customizer.withDefaults())
                 // The server keeps no session of its own: the signed cookie is checked on every request,
@@ -85,7 +87,10 @@ public class SecurityConfig {
                         .contentSecurityPolicy(csp -> csp.policyDirectives(CONTENT_SECURITY_POLICY))
                         .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.SAME_ORIGIN)))
                 // Not signed in: answer 401 and let the front end send the visitor to the sign-in page.
-                .exceptionHandling(errors -> errors.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                // Refused (403): a JSON message, marked when the cause is the forgery check.
+                .exceptionHandling(errors -> errors
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .accessDeniedHandler(new CsrfSupport.DeniedHandler()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/register",
@@ -98,7 +103,7 @@ public class SecurityConfig {
                         .anyRequest().permitAll())
                 .addFilterBefore(new RequestGuardFilter(authPerMinute, apiPerMinute, maxJsonBodyBytes), CsrfFilter.class)
                 .addFilterBefore(new CookieTokenFilter(jwtDecoder, jwtUserConverter), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(new CsrfSupport.CookieFilter(), CsrfFilter.class);
+                .addFilterAfter(new CsrfSupport.TokenHeaderFilter(), CsrfFilter.class);
         return http.build();
     }
 
@@ -148,7 +153,9 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(allowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Content-Type", "X-XSRF-TOKEN"));
+        config.setAllowedHeaders(List.of("Content-Type", CsrfSupport.HEADER));
+        // Lets a page on another port (Live Server) read the forgery-check value from each answer.
+        config.setExposedHeaders(List.of(CsrfSupport.HEADER));
         config.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);
